@@ -1,6 +1,6 @@
 /**
  * @file src/app.js
- * @description Entry point for the Express application.
+ * @description Entry point for the Express application with improved error handling and validation.
  */
 
 const express = require('express');
@@ -22,9 +22,20 @@ app.use(morgan('combined')); // HTTP request logger middleware
  * Route definitions
  */
 
-// Example API route
+// Example API route with validation and edge-case handling
 app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello World!' });
+  try {
+    const name = req.query.name || 'World';
+    
+    if (!name) {
+      throw new Error('Name parameter is required');
+    }
+
+    res.json({ message: `Hello ${name}!` });
+  } catch (err) {
+    console.error(err.stack);
+    res.status(400).send({ error: err.message });
+  }
 });
 
 // Error handling middleware
