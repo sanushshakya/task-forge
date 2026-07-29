@@ -14,7 +14,7 @@ const app = express();
 /**
  * Middleware setup
  */
-app.use(cors()); // Enable CORS
+app.use(cors({ origin: '*' })); // Enable CORS for all origins during development
 app.use(helmet()); // Secure HTTP headers
 app.use(morgan('combined')); // HTTP request logger middleware
 
