@@ -16,7 +16,10 @@ const app = express();
  */
 app.use(cors({ origin: '*' })); // Enable CORS for all origins during development
 app.use(helmet()); // Secure HTTP headers
-app.use(morgan('combined')); // HTTP request logger middleware
+
+// Custom HTTP request logger middleware using morgan with a custom format
+morgan.token('date', () => new Date().toISOString());
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms [:date[clf]]'));
 
 /**
  * Route definitions
