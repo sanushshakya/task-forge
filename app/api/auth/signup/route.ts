@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return new NextResponse('User already exists', { status: 409 });
+      return new NextResponse('Email already exists', { status: 409 });
     }
 
     // Hash the password
