@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 /**
  * Define a Mongoose schema for the Entry model.
- * @property userId - The ID of the user who created the entry, required.
+ * @property userId - The ID of the user who created the entry, required and references the User model.
  * @property date - The date of the entry, required.
  * @property tasks - An array of strings representing tasks completed, optional.
  * @property mood - A string representing the user's mood on that day, optional.
