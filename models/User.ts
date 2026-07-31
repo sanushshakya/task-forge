@@ -3,7 +3,9 @@ import mongoose from 'mongoose';
 /**
  * Define a Mongoose schema for the User model.
  * @property email - The user's email address, required and unique.
- * @property passwordHash - The hashed version of the user's password, required.
+ * @property hashed_password - The hashed version of the user's password, required.
+ * @property reset_token - A token for password reset purposes, optional.
+ * @property reset_token_expiry - The expiry time for the password reset token, optional.
  * @property createdAt - The timestamp when the user was created, defaulting to the current date.
  */
 const userSchema = new mongoose.Schema({
@@ -12,9 +14,15 @@ const userSchema = new mongoose.Schema({
     unique: true,
     required: true,
   },
-  passwordHash: {
+  hashed_password: {
     type: String,
     required: true,
+  },
+  reset_token: {
+    type: String,
+  },
+  reset_token_expiry: {
+    type: Date,
   },
   createdAt: {
     type: Date,
