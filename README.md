@@ -1,4 +1,4 @@
-# README.md
+// README.md
 
 ## Project Overview
 
@@ -35,6 +35,39 @@ This project is a Next.js 14 App Router application designed to serve as a templ
 
 ### Base URL
 All API routes are accessible via the base URL: `http://localhost:3000/api`.
+
+### Authentication Endpoints
+
+#### Endpoint
+- **POST `/api/auth/login`**
+
+#### Description
+This endpoint handles user login requests. It verifies the email and password against the User model using bcrypt.compare, issues a JWT using jsonwebtoken with 7-day expiry, and sets it as an httpOnly cookie.
+
+#### Request Body
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+#### Response on Success
+```json
+{
+  "message": "Login successful"
+}
+```
+
+#### Response on Failure
+```json
+{
+  "error": {
+    "code": "AUTH_INVALID_CREDENTIALS",
+    "message": "Invalid email or password"
+  }
+}
+```
 
 ### Example Route
 
