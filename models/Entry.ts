@@ -2,29 +2,33 @@ import mongoose from 'mongoose';
 
 /**
  * Define a Mongoose schema for the Entry model.
- * @property title - The title of the entry, required and unique.
- * @property content - The content of the entry, required.
- * @property authorId - The ID of the user who created the entry, required.
- * @property createdAt - The timestamp when the entry was created, defaulting to the current date.
+ * @property userId - The ID of the user who created the entry, required.
+ * @property date - The date of the entry, required.
+ * @property tasks - An array of strings representing tasks completed, optional.
+ * @property mood - A string representing the user's mood on that day, optional.
+ * @property notes - Additional notes or comments about the day, optional.
  */
 const entrySchema = new mongoose.Schema({
-  title: {
-    type: String,
-    unique: true,
-    required: true,
-  },
-  content: {
-    type: String,
-    required: true,
-  },
-  authorId: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
-  createdAt: {
+  date: {
     type: Date,
-    default: Date.now,
+    required: true,
+  },
+  tasks: {
+    type: [String],
+    required: false,
+  },
+  mood: {
+    type: String,
+    required: false,
+  },
+  notes: {
+    type: String,
+    required: false,
   },
 });
 
