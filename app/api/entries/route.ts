@@ -1,62 +1,56 @@
 /**
- * Handles entry creation requests with authentication and upsert functionality based on today's date.
+ * Handles entry retrieval requests for authenticated users, optionally filtering by date range and sorting by date descending.
  */
 import { Request, Response } from 'express';
-import { body, validationResult } from 'express-validator';
 import EntryModel from '../models/Entry';
 import authMiddleware from '../middleware/auth';
 
-// Define validation rules for the entry creation request
-const validateEntryCreation = [
-  body('title').trim().isLength({ min: 1 }).withMessage('Title must be at least 1 character long'),
-  body('content').trim().isLength({ min: 1 }).withMessage('Content must be at least 1 character long'),
+// Define validation rules for the entry retrieval request query parameters
+const validateEntryRetrieval = [
+  body('startDate').optional().isISO8601().withMessage('Start date must be a valid ISO 8601 date'),
+  body('endDate').optional().isISO8601().withMessage('End date must be a valid ISO 8601 date'),
 ];
 
 /**
- * Create a new entry or update an existing one if it already exists based on today's date.
+ * Retrieve the authenticated user's entries, optionally filtered by date range and sorted by date descending.
  * @param req - The incoming request object.
  * @param res - The response object.
- * @returns A response indicating success or failure.
+ * @returns A response containing the user's entries or an error message.
  */
-export const createEntry = async (req: Request, res: Response) => {
-  // Validate the incoming request
+export const getEntries = async (req: Request, res: Response) => {
+  // Validate the incoming request query parameters
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
 
   try {
-    const { title, content } = req.body;
     const userId = (req.user as any)._id; // Cast to any to access _id property safely
-    const date = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
 
-    // Check if an entry already exists with the same title for today's date
-    const existingEntry = await EntryModel.findOne({ title, userId, date });
+    // Define the query object for filtering entries
+    let query: { userId: string } & Partial<{ startDate: Date, endDate: Date }> = { userId };
 
-    if (existingEntry) {
-      // Update the existing entry
-      existingEntry.content = content;
-      await existingEntry.save();
-      return res.status(200).json(existingEntry);
-    } else {
-      // Create a new entry with today's date
-      const newEntry = new EntryModel({
-        title,
-        content,
-        userId,
-        date, // Add the date field to the entry
-      });
-      await newEntry.save();
-      return res.status(201).json(newEntry);
+    // Add date range filter if provided
+    const { startDate, endDate } = req.query;
+    if (startDate) {
+      query.startDate = new Date(startDate as string);
     }
+    if (endDate) {
+      query.endDate = new Date(endDate as string);
+    }
+
+    // Retrieve the entries from the database
+    const entries = await EntryModel.find(query).sort({ date: -1 });
+
+    return res.status(200).json(entries);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error' });
   }
 };
 
-// Define the route for entry creation
+// Define the route for entry retrieval
 const router = require('express').Router();
-router.post('/entries', authMiddleware, validateEntryCreation, createEntry);
+router.get('/entries', authMiddleware, validateEntryRetrieval, getEntries);
 
 module.exports = router;
