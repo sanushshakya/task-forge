@@ -33,6 +33,27 @@ const entrySchema = new mongoose.Schema({
 });
 
 /**
+ * Method to retrieve entries by user and date range.
+ * @param userId - The ID of the user.
+ * @param startDate - Optional start date for filtering.
+ * @param endDate - Optional end date for filtering.
+ * @returns A promise that resolves with an array of entries matching the criteria.
+ */
+entrySchema.statics.findByUserAndDateRange = async function (userId: mongoose.Types.ObjectId, startDate?: Date, endDate?: Date) {
+  const query: any = { userId };
+
+  if (startDate) {
+    query.date = { ...query.date, $gte: startDate };
+  }
+
+  if (endDate) {
+    query.date = { ...query.date, $lte: endDate };
+  }
+
+  return this.find(query).sort({ date: -1 });
+};
+
+/**
  * Create and export the Entry model.
  */
 const Entry = mongoose.model('Entry', entrySchema);
