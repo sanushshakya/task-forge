@@ -27,7 +27,7 @@ export const createEntry = async (req: Request, res: Response) => {
 
   try {
     const { title, content } = req.body;
-    const userId = req.user._id;
+    const userId = (req.user as any)._id; // Cast to any to access _id property safely
 
     // Check if an entry already exists with the same title
     const existingEntry = await EntryModel.findOne({ title, userId });
