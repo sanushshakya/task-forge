@@ -69,6 +69,18 @@ This endpoint handles user login requests. It verifies the email and password ag
 }
 ```
 
+### JWT Handling in `lib/auth.ts`
+This project utilizes JSON Web Tokens (JWT) for user authentication. The JWT is generated upon successful login and set as an httpOnly cookie. It contains a payload with the user's ID and has a 7-day expiration time.
+
+#### Example JWT Payload
+```json
+{
+  "userId": "user-id",
+  "iat": current timestamp,
+  "exp": current timestamp + 7 days
+}
+```
+
 ### Example Route
 
 #### Endpoint
