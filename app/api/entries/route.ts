@@ -1,5 +1,5 @@
 /**
- * Handles entry creation requests with authentication and upsert functionality.
+ * Handles entry creation requests with authentication and upsert functionality based on today's date.
  */
 import { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
@@ -13,7 +13,7 @@ const validateEntryCreation = [
 ];
 
 /**
- * Create a new entry or update an existing one if it already exists.
+ * Create a new entry or update an existing one if it already exists based on today's date.
  * @param req - The incoming request object.
  * @param res - The response object.
  * @returns A response indicating success or failure.
@@ -28,9 +28,10 @@ export const createEntry = async (req: Request, res: Response) => {
   try {
     const { title, content } = req.body;
     const userId = (req.user as any)._id; // Cast to any to access _id property safely
+    const date = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
 
-    // Check if an entry already exists with the same title
-    const existingEntry = await EntryModel.findOne({ title, userId });
+    // Check if an entry already exists with the same title for today's date
+    const existingEntry = await EntryModel.findOne({ title, userId, date });
 
     if (existingEntry) {
       // Update the existing entry
@@ -38,11 +39,12 @@ export const createEntry = async (req: Request, res: Response) => {
       await existingEntry.save();
       return res.status(200).json(existingEntry);
     } else {
-      // Create a new entry
+      // Create a new entry with today's date
       const newEntry = new EntryModel({
         title,
         content,
         userId,
+        date, // Add the date field to the entry
       });
       await newEntry.save();
       return res.status(201).json(newEntry);
