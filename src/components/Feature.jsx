@@ -29,6 +29,13 @@ const EntryForm: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
+      if (!formState.task.trim()) {
+        throw new Error('Task cannot be empty');
+      }
+      if (formState.mood < 1 || formState.mood > 5) {
+        throw new Error('Mood must be between 1 and 5');
+      }
+
       const response = await fetch('/api/entries', {
         method: 'POST',
         headers: {
