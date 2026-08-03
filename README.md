@@ -116,3 +116,52 @@ Contributions are welcome! Please open an issue to discuss any new features, bug
 ## License
 
 This project is licensed under the ISC license. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## New Component: EntryForm
+
+The `EntryForm` component allows users to add tasks, toggle their status, remove tasks, rate their mood on a 1-5 scale, and add notes. Upon submission, it posts the data to `/api/entries` using the `fetch` API.
+
+### Usage
+
+```jsx
+import React from 'react';
+import EntryForm from '@/components/EntryForm';
+
+const App = () => {
+  return (
+    <div>
+      <h1>Task Manager</h1>
+      <EntryForm />
+    </div>
+  );
+};
+
+export default App;
+```
+
+### Component Details
+
+#### State Management
+- `tasks`: Array of tasks with properties `id`, `text`, and `completed`.
+- `mood`: Number representing the user's mood (1-5).
+- `notes`: String containing any additional notes.
+
+#### Functions
+- `addTask(text: string)`: Adds a new task to the state.
+- `removeTask(id: number)`: Removes a task from the state by its ID.
+- `toggleTask(id: number)`: Toggles the completion status of a task.
+- `handleMoodChange(event: React.ChangeEvent<HTMLInputElement>)`: Updates the mood based on the slider input.
+- `handleNotesChange(event: React.ChangeEvent<HTMLTextAreaElement>)`: Updates the notes based on the textarea input.
+- `handleSubmit(event: React.FormEvent<HTMLFormElement>)`: Handles form submission, constructs the payload, and sends it to `/api/entries`.
+
+### Styling
+The component uses inline styles for simplicity. Consider using styled components or CSS modules in a production environment.
+
+### Error Handling
+No error handling is included in this example. In a real-world application, you should add appropriate error messages and handle network errors gracefully.
+
+---
+
+End of README updates.
