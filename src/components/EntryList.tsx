@@ -4,7 +4,7 @@ import axios from 'axios';
 /**
  * EntryList component — Fetches and renders a list of entries.
  */
-const EntryList: React.FC<{ entries: Array<{ id: string; title: string; content: string }> }> = ({ entries }) => {
+const EntryList: React.FC<{ entries: Array<{ id: string; title: string; content: string; date: Date; mood: string; completedTasks: number }> }> = ({ entries }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,6 +32,9 @@ const EntryList: React.FC<{ entries: Array<{ id: string; title: string; content:
         <li key={entry.id}>
           <h3>{entry.title}</h3>
           <p>{entry.content}</p>
+          <small>Date: {entry.date.toLocaleDateString()}</small>
+          <small>Mood: {entry.mood}</small>
+          <small>Completed Tasks: {entry.completedTasks}</small>
         </li>
       ))}
     </ul>
