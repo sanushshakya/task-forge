@@ -6,8 +6,7 @@ import axios from 'axios';
 /**
  * EntryList component — Fetches and renders a list of entries.
  */
-const EntryList: React.FC = () => {
-  const [entries, setEntries] = useState<Array<{ id: string; title: string; content: string }>>([]);
+const EntryList: React.FC<{ entries: Array<{ id: string; title: string; content: string }> }> = ({ entries }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
