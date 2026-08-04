@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 /**
- * EntryList component — Fetches and renders a list of entries.
+ * EntryList component — Fetches and renders a list of entries with error handling.
  */
 const EntryList: React.FC<{ entries: Array<{ id: string; title: string; content: string; date: Date; mood: string; completedTasks: number }> }> = ({ entries }) => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -15,7 +15,11 @@ const EntryList: React.FC<{ entries: Array<{ id: string; title: string; content:
         setEntries(response.data.entries);
         setLoading(false);
       } catch (err) {
-        setError('Failed to load entries');
+        if (axios.isAxiosError(err)) {
+          setError(`Failed to load entries: ${err.message}`);
+        } else {
+          setError('An unexpected error occurred while loading entries');
+        }
         setLoading(false);
       }
     };
