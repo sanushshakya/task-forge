@@ -1,43 +1,37 @@
-import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+// lib/auth.ts
 
 /**
- * Dependency for decoding a JWT token and returning the current user.
+ * Helper functions for handling authentication-related tasks.
  */
-export class JWTDependency {
-    private secretKey: string;
+export namespace AuthHelper {
+  /**
+   * Decodes a JWT token and returns the current user's ID.
+   * @param request - The incoming HTTP request.
+   * @returns The user ID if the token is valid, otherwise null.
+   */
+  export async function getCurrentUserId(request: Request): Promise<string | null> {
+    try {
+      const authHeader = request.headers.get('Authorization');
+      if (!authHeader) return null;
 
-    /**
-     * Initializes the JWTDependency with a secret key.
-     * @param secretKey - The secret key used to decode the JWT token.
-     */
-    constructor(secretKey: string) {
-        this.secretKey = secretKey;
+      const token = authHeader.split(' ')[1];
+      if (!token) return null;
+
+      const decodedToken = jwt.verify(token, process.env.JWT_SECRET as string);
+      return decodedToken.userId as string;
+    } catch (error) {
+      console.error('Error decoding JWT token:', error);
+      return null;
     }
+  }
 
-    /**
-     * Decodes a JWT token and returns the decoded payload or null if invalid.
-     * @param token - The JWT token to decode.
-     * @returns The decoded payload or null if invalid.
-     */
-    async decodeToken(token: string | undefined): Promise<string | null> {
-        try {
-            if (!token) return null;
-            const decoded = await jwt.verify(token, this.secretKey);
-            return decoded.userId as string;
-        } catch (error) {
-            return null;
-        }
-    }
-}
-
-/**
- * Extracts the JWT token from a request's cookies and returns the userId or null.
- * @param req - The incoming request object.
- * @returns The userId if authenticated, otherwise null.
- */
-export function getUserFromRequest(req: NextRequest): string | null {
-    const jwtDependency = new JWTDependency(process.env.JWT_SECRET as string);
-    const token = req.cookies.get('jwt')?.value;
-    return jwtDependency.decodeToken(token);
+  /**
+   * Checks if a user is authenticated based on the presence of a valid JWT token.
+   * @param request - The incoming HTTP request.
+   * @returns true if the user is authenticated, false otherwise.
+   */
+  export async function isAuthenticated(request: Request): Promise<boolean> {
+    const userId = await getCurrentUserId(request);
+    return !!userId;
+  }
 }
