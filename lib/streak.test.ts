@@ -46,4 +46,19 @@ describe('calculateStreak', () => {
     const entries: Date[] = [today, new Date(today.getFullYear(), today.getMonth(), today.getDate() + 3), yesterday];
     expect(calculateStreak(entries)).toBe(0);
   });
+
+  it('should return 1 for one entry on a different day', () => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const entries: Date[] = [tomorrow];
+    expect(calculateStreak(entries)).toBe(0);
+  });
+
+  it('should return 2 for two consecutive days with the same date', () => {
+    const today = new Date();
+    const entries: Date[] = [today, today, tomorrow];
+    expect(calculateStreak(entries)).toBe(1);
+  });
 });
