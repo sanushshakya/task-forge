@@ -8,10 +8,13 @@ import { Entry } from '../models/Entry';
  */
 export function calculateStreak(entries: Entry[]): number {
   const today = new Date();
-  const sortedEntries = entries.map(entry => entry.date).sort((a, b) => a.getTime() - b.getTime()).reverse();
+  const sortedEntries = entries
+    .map(entry => entry.date)
+    .sort((a, b) => a.getTime() - b.getTime())
+    .reverse();
 
   let streak = 0;
-  let currentDate = today;
+  let currentDate = new Date(today);
 
   for (const entryDate of sortedEntries) {
     if (entryDate.toDateString() === currentDate.toDateString()) {
