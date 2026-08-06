@@ -14,8 +14,16 @@ const EntrySchema = z.object({
 /**
  * Validates an entry using the defined schema.
  * @param data - Entry data to validate.
- * @returns The validated entry or throws an error if validation fails.
+ * @returns A success/error object indicating validation result.
  */
-export function validateEntry(data: any) {
-  return EntrySchema.parse(data);
+export function validateEntry(data: any): { success: boolean; error?: string } {
+  try {
+    const validatedData = EntrySchema.parse(data);
+    return { success: true };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { success: false, error: error.issues.map(issue => issue.message).join(', ') };
+    }
+    return { success: false, error: 'Validation failed' };
+  }
 }
