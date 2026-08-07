@@ -18,7 +18,7 @@ export async function POST(request: Request, response: Response) {
     // Validate the entry data using Zod schema
     const validationResult = validateEntry(entryData);
     if (!validationResult.success) {
-      throw new HTTPException(400, validationResult.error.format());
+      throw new HTTPException(400, JSON.stringify(validationResult.error.format()));
     }
 
     // If validation passes, proceed with saving the entry
