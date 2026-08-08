@@ -49,8 +49,32 @@ export const getEntries = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * Route handler for retrieving the authenticated user's last 7 entries, including mood scores and task completion rates.
+ * @param req - The incoming request object.
+ * @param res - The response object.
+ * @returns A response containing the user's last 7 entries or an error message.
+ */
+export const getLastSevenEntries = async (req: Request, res: Response) => {
+  try {
+    const userId = (req.user as any)._id; // Cast to any to access _id property safely
+
+    // Define the query object for retrieving the last 7 entries
+    const query = { userId };
+
+    // Retrieve the last 7 entries from the database, sorted by date descending
+    const entries = await EntryModel.find(query).sort({ date: -1 }).limit(7);
+
+    return res.status(200).json(entries);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // Define the route for entry retrieval
 const router = require('express').Router();
 router.get('/entries', authMiddleware, validateEntryRetrieval, getEntries);
+router.get('/last-seven-entries', authMiddleware, getLastSevenEntries);
 
 module.exports = router;
