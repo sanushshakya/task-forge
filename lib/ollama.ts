@@ -5,7 +5,7 @@ import fetch from 'node-fetch';
 /**
  * Ollama API client for sending requests and handling responses.
  */
-export async function generateText(prompt: string, model = "qwen2.5-coder:7b"): Promise<string> {
+export async function generateText(prompt: string, model: string = "qwen2.5-coder:7b"): Promise<string> {
   try {
     const response = await fetch('http://localhost:11434/api/generate', {
       method: 'POST',
