@@ -8,6 +8,32 @@ import decodeToken from '@/auth/dependencies.py';
 const app = new FastAPI();
 
 /**
+ * Middleware to ensure the routes only process requests for authenticated users and return 404 if not.
+ * @param request - The incoming HTTP request.
+ * @param callNext - The next middleware function in the chain.
+ */
+export async function authMiddleware(request: Request, callNext) {
+  try {
+    // Extract the token from the authorization header
+    const token = request.headers.get('Authorization')?.split(' ')[1];
+    if (!token) throw new HTTPException(401, 'Unauthorized');
+
+    // Decode the token to get the user ID
+    decodeToken(token);
+  } catch (error) {
+    if (error instanceof HTTPException) {
+      return error.response;
+    }
+    console.error(error);
+    return new HTTPException(500, 'Internal Server Error');
+  }
+
+  return await callNext(request);
+}
+
+app.use(authMiddleware);
+
+/**
  * Route handler for updating an entry by ID.
  * @param request - The incoming HTTP request.
  * @param id - The ID of the entry to update.
@@ -15,13 +41,6 @@ const app = new FastAPI();
  */
 export async function PATCH(request: Request, id: string) {
   try {
-    // Extract the token from the authorization header
-    const token = request.headers.get('Authorization')?.split(' ')[1];
-    if (!token) throw new HTTPException(401, 'Unauthorized');
-
-    // Decode the token to get the user ID
-    const userId = decodeToken(token).userId;
-
     // Find the entry by ID and update it
     const updatedEntry = await Entry.findByIdAndUpdate(
       id,
@@ -30,9 +49,6 @@ export async function PATCH(request: Request, id: string) {
     );
 
     if (!updatedEntry) throw new HTTPException(404, 'Entry not found');
-
-    // Check if the entry belongs to the authenticated user
-    if (updatedEntry.userId !== userId) throw new HTTPException(403, 'Forbidden');
 
     return updatedEntry;
   } catch (error) {
@@ -52,20 +68,10 @@ export async function PATCH(request: Request, id: string) {
  */
 export async function DELETE(request: Request, id: string) {
   try {
-    // Extract the token from the authorization header
-    const token = request.headers.get('Authorization')?.split(' ')[1];
-    if (!token) throw new HTTPException(401, 'Unauthorized');
-
-    // Decode the token to get the user ID
-    const userId = decodeToken(token).userId;
-
     // Find and delete the entry by ID
     const deletedEntry = await Entry.findByIdAndDelete(id);
 
     if (!deletedEntry) throw new HTTPException(404, 'Entry not found');
-
-    // Check if the entry belongs to the authenticated user
-    if (deletedEntry.userId !== userId) throw new HTTPException(403, 'Forbidden');
 
     return { message: 'Entry deleted successfully' };
   } catch (error) {
