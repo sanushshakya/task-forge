@@ -1,7 +1,7 @@
 // app/api/entries/[id]/route.ts
 
 import { FastAPI } from 'fastapi';
-import { Depends, Request } from 'fastapi.types';
+import { Request } from 'fastapi.types';
 import { Entry } from '@/models/Entry';
 import decodeToken from '@/auth/dependencies.py';
 
