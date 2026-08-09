@@ -41,6 +41,9 @@ app.use(authMiddleware);
  */
 export async function PATCH(request: Request, id: string) {
   try {
+    // Extract the user ID from the decoded token
+    const userId = decodeToken(request.headers.get('Authorization')?.split(' ')[1]);
+
     // Find the entry by ID and update it
     const updatedEntry = await Entry.findByIdAndUpdate(
       id,
@@ -49,6 +52,9 @@ export async function PATCH(request: Request, id: string) {
     );
 
     if (!updatedEntry) throw new HTTPException(404, 'Entry not found');
+
+    // Check if the authenticated user owns the entry
+    if (updatedEntry.userId !== userId) throw new HTTPException(403, 'Forbidden');
 
     return updatedEntry;
   } catch (error) {
@@ -68,10 +74,16 @@ export async function PATCH(request: Request, id: string) {
  */
 export async function DELETE(request: Request, id: string) {
   try {
+    // Extract the user ID from the decoded token
+    const userId = decodeToken(request.headers.get('Authorization')?.split(' ')[1]);
+
     // Find and delete the entry by ID
     const deletedEntry = await Entry.findByIdAndDelete(id);
 
     if (!deletedEntry) throw new HTTPException(404, 'Entry not found');
+
+    // Check if the authenticated user owns the entry
+    if (deletedEntry.userId !== userId) throw new HTTPException(403, 'Forbidden');
 
     return { message: 'Entry deleted successfully' };
   } catch (error) {
