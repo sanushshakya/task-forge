@@ -2,9 +2,9 @@
 
 import express from 'express';
 import { body } from 'express-validator';
-import axios from 'axios';
 import { validateRequest } from '@/middleware/validation';
 import { SummaryRequest, SummaryResponse } from './types';
+import { generateText } from '@/lib/ollama';
 
 const router = express.Router();
 
@@ -23,9 +23,8 @@ router.post('/generate',
     try {
       const { entryId } = req.body as SummaryRequest;
 
-      // Fetch the entry from the database
-      const response = await axios.post<SummaryResponse>('https://api.ollama.com/summarize', { entryId });
-      const summary = response.data.summary;
+      // Generate the summary using the Ollama API client
+      const summary = await generateText(entryId);
 
       return res.status(200).json({ summary });
     } catch (error) {
