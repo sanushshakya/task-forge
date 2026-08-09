@@ -4,7 +4,7 @@ import { FastAPI } from 'fastapi';
 import { Depends, Request } from 'fastapi.types';
 import decodeToken from '@/auth/dependencies.py';
 import Entry from '@/models/Entry'; // Import the Entry model
-import libOllama from '@/lib/ollama.ts'; // Import the Ollama API client
+import generateText from '@/lib/ollama.ts'; // Import generateText function from lib/ollama.ts
 
 const app = new FastAPI();
 
@@ -37,13 +37,13 @@ export async function GET(request: Request) {
       taskCompletionRate: calculateTaskCompletionRate(entry.tasks)
     }));
 
-    // Call the Ollama API to get additional insights
-    const ollamaResponse = await libOllama.generateSummary(insights);
+    // Generate additional insights using generateText from lib/ollama.ts
+    const summary = await generateText(insights);
 
     return {
       data: {
         insights,
-        summary: ollamaResponse.summary
+        summary
       }
     };
   } catch (error) {
