@@ -9,6 +9,11 @@ interface Entry {
   createdAt: Date;
 }
 
+/**
+ * MoodChart component to plot mood over the last 14 entries.
+ * @param props - Props for the component.
+ * @param props.entries - Array of mood entries.
+ */
 const MoodChart: React.FC<{ entries: Entry[] }> = ({ entries }) => {
   // Sort entries by createdAt to ensure correct order
   const sortedEntries = entries.sort((a, b) => a.createdAt - b.createdAt);
