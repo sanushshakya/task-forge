@@ -1,5 +1,3 @@
-// components/EntryForm.tsx
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -23,6 +21,9 @@ const EntryForm: React.FC = () => {
     fetchSummary();
   }, []);
 
+  /**
+   * Fetches the summary for the current entry.
+   */
   const fetchSummary = async () => {
     try {
       setIsLoading(true);
@@ -37,6 +38,10 @@ const EntryForm: React.FC = () => {
     }
   };
 
+  /**
+   * Handles changes to the entry content.
+   * @param e - The change event from the textarea.
+   */
   const handleEntryChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setEntry({ ...entry, content: e.target.value });
   };
