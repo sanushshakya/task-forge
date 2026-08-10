@@ -39,7 +39,7 @@ export async function constructPromptText(userId: mongoose.Types.ObjectId): Prom
 export interface Entry {
   userId: mongoose.Types.ObjectId;
   createdAt: Date;
-  mood: number;
-  tasksCompleted: number;
-  totalTasks: number;
+  mood: number; // The mood score, a value between 1 and 5
+  tasksCompleted: number; // The number of completed tasks
+  totalTasks: number; // The total number of tasks
 }
