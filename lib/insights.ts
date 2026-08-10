@@ -32,3 +32,14 @@ export async function constructPromptText(userId: mongoose.Types.ObjectId): Prom
     throw new Error("Failed to construct prompt text.");
   }
 }
+
+/**
+ * Defines an interface for the Entry model.
+ */
+export interface Entry {
+  userId: mongoose.Types.ObjectId;
+  createdAt: Date;
+  mood: number;
+  tasksCompleted: number;
+  totalTasks: number;
+}
