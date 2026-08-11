@@ -1,44 +1,28 @@
-/**
- * Auth schemas for login and registration requests and token responses.
- * @module schemas/auth
- */
+import { z } from 'zod';
 
-import { Schema } from 'mongoose';
+// Define Pydantic-like schemas using Zod for validation
 
 /**
- * Pydantic schema for login request.
+ * Schema for login requests.
  */
-export const LoginRequest = {
-  type: 'object',
-  properties: {
-    email: { type: 'string', format: 'email' },
-    password: { type: 'string' }
-  },
-  required: ['email', 'password'],
-  additionalProperties: false
-} as Schema;
+export const LoginRequest = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
 
 /**
- * Pydantic schema for registration request.
+ * Schema for registration requests.
  */
-export const RegisterRequest = {
-  type: 'object',
-  properties: {
-    email: { type: 'string', format: 'email' },
-    password: { type: 'string' }
-  },
-  required: ['email', 'password'],
-  additionalProperties: false
-} as Schema;
+export const RegisterRequest = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  name: z.string().min(2),
+});
 
 /**
- * Pydantic schema for token response.
+ * Schema for token responses.
  */
-export const TokenResponse = {
-  type: 'object',
-  properties: {
-    accessToken: { type: 'string' }
-  },
-  required: ['accessToken'],
-  additionalProperties: false
-} as Schema;
+export const TokenResponse = z.object({
+  access_token: z.string(),
+  token_type: z.literal('bearer'),
+});
