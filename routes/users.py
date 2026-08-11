@@ -1,7 +1,7 @@
-// routes/users.ts
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import User from '@/models/User';
+import { get_current_user } from '@/auth/dependencies.py';
 
 /**
  * Handles user login requests.
@@ -44,4 +44,17 @@ export async function POST(request: NextRequest) {
     console.error('Login error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
+}
+
+/**
+ * Middleware to ensure the routes only process requests for authenticated users
+ */
+export async function protectedRoute(request: NextRequest, handler: (request: NextRequest) => Promise<NextResponse>) {
+  const user = await get_current_user(request);
+  
+  if (!user) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
+  return handler(request);
 }
