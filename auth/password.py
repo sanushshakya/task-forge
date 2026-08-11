@@ -1,26 +1,31 @@
-import bcrypt from 'bcryptjs';
+# auth/password.py
 
-/**
- * Utility functions for password handling using bcrypt.
- */
-export class PasswordUtil {
-  /**
-   * Hashes a plain text password.
-   * @param plainTextPassword - The plain text password to hash.
-   * @returns A promise that resolves to the hashed password.
-   */
-  public static async hash(plainTextPassword: string): Promise<string> {
-    const saltRounds = 10;
-    return await bcrypt.hash(plainTextPassword, saltRounds);
-  }
+import bcrypt
+from passlib.context import CryptContext
 
-  /**
-   * Verifies a plain text password against a hashed password.
-   * @param plainTextPassword - The plain text password to verify.
-   * @param hashedPassword - The hashed password to compare against.
-   * @returns A promise that resolves to true if the passwords match, false otherwise.
-   */
-  public static async verify(plainTextPassword: string, hashedPassword: string): Promise<boolean> {
-    return await bcrypt.compare(plainTextPassword, hashedPassword);
-  }
-}
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def hash_password(password: str) -> str:
+    """
+    Hashes a given password using bcrypt.
+    
+    Args:
+        password (str): The plain text password to be hashed.
+        
+    Returns:
+        str: The hashed password.
+    """
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """
+    Verifies if a given plain text password matches a hashed password.
+    
+    Args:
+        plain_password (str): The plain text password to be verified.
+        hashed_password (str): The hashed password to compare against.
+        
+    Returns:
+        bool: True if the passwords match, False otherwise.
+    """
+    return pwd_context.verify(plain_password, hashed_password)

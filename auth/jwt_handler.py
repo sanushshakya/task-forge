@@ -1,61 +1,53 @@
-import jwt from 'jsonwebtoken';
+import jwt
+from datetime import datetime, timedelta
 
-/**
- * JWT Handler for encoding and decoding JWT tokens with expiration.
- */
-export class JWTHandler {
-  private secretKey: string;
-  private expiresIn: string;
+class JWTHandler:
+    """
+    Class to handle JWT encoding and decoding with expiration.
+    """
 
-  /**
-   * Initializes the JWT Handler with a secret key and token expiration time.
-   * @param secretKey - The secret key used to sign and verify JWTs.
-   * @param expiresIn - The time until the JWT expires, e.g., '7d' for 7 days.
-   */
-  constructor(secretKey: string, expiresIn: string) {
-    this.secretKey = secretKey;
-    this.expiresIn = expiresIn;
-  }
+    @staticmethod
+    def encode_token(user_id: str) -> str:
+        """
+        Encode a user ID into a JWT token with an expiration time.
 
-  /**
-   * Encodes a payload into a JWT token with an expiration time.
-   * @param payload - The data to be encoded in the JWT.
-   * @returns A promise that resolves to the encoded JWT token.
-   */
-  public async encode(payload: any): Promise<string> {
-    return new Promise((resolve, reject) => {
-      jwt.sign(
-        payload,
-        this.secretKey,
-        { expiresIn: this.expiresIn },
-        (error, token) => {
-          if (error) reject(error);
-          else resolve(token);
+        Args:
+            user_id (str): The user ID to encode.
+
+        Returns:
+            str: The encoded JWT token.
+        """
+        payload = {
+            'user_id': user_id,
+            'exp': datetime.utcnow() + timedelta(hours=1),  # Token expires in 1 hour
         }
-      );
-    });
-  }
+        token = jwt.encode(payload, 'SECRET_KEY', algorithm='HS256')
+        return token
 
-  /**
-   * Decodes a JWT token to extract the payload.
-   * @param token - The JWT token to be decoded.
-   * @returns A promise that resolves to the decoded payload or an error message.
-   */
-  public async decode(token: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      jwt.verify(
-        token,
-        this.secretKey,
-        (error, decoded) => {
-          if (error) reject('Invalid token');
-          else resolve(decoded);
-        }
-      );
-    });
-  }
-}
+    @staticmethod
+    def decode_token(token: str) -> dict:
+        """
+        Decode a JWT token and extract the user ID.
 
-// Usage example:
-// const jwtHandler = new JWTHandler(process.env.JWT_SECRET as string, '7d');
-// const token = await jwtHandler.encode({ userId: 'user123' });
-// const payload = await jwtHandler.decode(token);
+        Args:
+            token (str): The JWT token to decode.
+
+        Returns:
+            dict: A dictionary containing the decoded payload, or an error if decoding fails.
+        """
+        try:
+            payload = jwt.decode(token, 'SECRET_KEY', algorithms=['HS256'])
+            return {'user_id': payload['user_id']}
+        except jwt.ExpiredSignatureError:
+            return {'error': 'Token has expired'}
+        except jwt.InvalidTokenError:
+            return {'error': 'Invalid token'}
+
+# Example usage
+if __name__ == "__main__":
+    user_id = "12345"
+    encoded_token = JWTHandler.encode_token(user_id)
+    print(f"Encoded Token: {encoded_token}")
+
+    decoded_payload = JWTHandler.decode_token(encoded_token)
+    print(f"Decoded Payload: {decoded_payload}")
