@@ -1,3 +1,24 @@
+// models/Settings.ts
+
+/**
+ * Represents a user's settings including preferences for AI summaries and weekly insights.
+ */
+export interface Settings {
+  /**
+   * Indicates whether AI summary generation is enabled.
+   */
+  aiSummaryEnabled: boolean;
+
+  /**
+   * Indicates whether weekly insight generation is enabled.
+   */
+  weeklyInsightEnabled: boolean;
+}
+```
+
+```typescript
+// app/api/settings/route.ts
+
 import { FastAPI, HTTPException, Request, Response } from 'fastapi';
 import { Depends, Patch, Post, Query } from 'fastapi.types';
 import { decodeToken } from '@/auth/dependencies.py';
