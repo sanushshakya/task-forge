@@ -14,9 +14,7 @@ export interface Settings {
    */
   weeklyInsightEnabled: boolean;
 }
-```
 
-```typescript
 // app/api/settings/route.ts
 
 import { FastAPI, HTTPException, Request, Response } from 'fastapi';
