@@ -22,7 +22,7 @@ router.post('/', checkRateLimit, async (req: express.Request, res: express.Respo
     if (settings.aiSummaryEnabled) {
       await SummaryController.generateSummary(req, res);
     } else {
-      res.status(403).json({ message: 'AI summary generation is disabled for this user.' });
+      res.status(403).json({ message: 'AI summary disabled' });
     }
   } catch (error) {
     next(error); // Pass the error to the error handling middleware
