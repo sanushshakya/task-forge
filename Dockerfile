@@ -1,23 +1,37 @@
-# Stage 1: Build the application
-FROM node:18 as builder
+# Dockerfile
 
+# Use an official Node.js runtime as a parent image
+FROM node:16 AS builder
+
+# Set the working directory in the container
 WORKDIR /app
 
+# Copy package.json and package-lock.json
 COPY package*.json ./
-RUN npm install --prod
 
-COPY tsconfig.json ./
-COPY src ./src
+# Install production dependencies
+RUN npm install --only=production
 
+# Bundle app source inside Docker image
+COPY . .
+
+# Build the application
 RUN npm run build
 
-# Stage 2: Create a minimal production image
-FROM node:18-slim
+# Use an official Node.js runtime as a parent image for the production environment
+FROM node:16
 
+# Set the working directory in the container
 WORKDIR /app
 
-COPY --from=builder /app/out ./out
+# Copy the dependencies from the builder stage
+COPY --from=builder /app/node_modules ./node_modules
 
+# Bundle app source inside Docker image from the builder stage
+COPY --from=builder /app/dist ./dist
+
+# Expose port 3000
 EXPOSE 3000
 
-CMD ["node", "./out/server.js"]
+# Command to run the application
+CMD ["npm", "start"]
