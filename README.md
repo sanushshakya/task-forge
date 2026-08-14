@@ -1,43 +1,17 @@
-// app/api/entries/export/route.ts
+# task
 
-import { FastAPI, Request, Response } from 'fastapi';
-import jwt from 'jsonwebtoken';
-import mongoose from 'mongoose';
-import Entry from '@/models/Entry';
-import { decodeToken } from '@/auth/dependencies.py';
+## Purpose
 
-const app = new FastAPI();
+Create a multi-stage Dockerfile for a Next.js 14 TypeScript app: stage 1 installs deps and builds, stage 2 copies the standalone build output and runs it on port 3000. Assume `output: "standalone"` is set in `next.config.js`.
 
-/**
- * Route handler for exporting all authenticated user's entries as a JSON file.
- * @param request - The incoming HTTP request.
- * @returns A downloadable JSON file with the user's entries or a 401 error if not authenticated.
- */
-export async function GET(request: Request, response: Response) {
-  try {
-    // Extract the token from the authorization header
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader) throw new Error('No authentication token provided');
+## Task
 
-    // Decode the JWT token to get the user ID
-    const decodedToken = decodeToken(authHeader);
-    if (!decodedToken) throw new Error('Invalid or expired token');
+Update README — Document the new file in README.
 
-    // Retrieve all entries for the authenticated user from MongoDB
-    const entries = await Entry.find({ userId: decodedToken.userId });
+## File
 
-    // Convert entries to JSON format
-    const jsonString = JSON.stringify(entries, null, 2);
+`README.md`
 
-    // Set response headers for file download
-    response.headers.set('Content-Type', 'application/json');
-    response.headers.set('Content-Disposition', 'attachment; filename=entries.json');
+### Existing File — you are UPDATING it.
 
-    // Send the JSON string as the response body
-    return response.send(jsonString);
-  } catch (error) {
-    // Handle errors and return a 500 error with an error message
-    console.error(error);
-    return response.status(500).send({ error: 'Internal server error' });
-  }
-}
+Keep all existing logic; only add/change what the task requires.
