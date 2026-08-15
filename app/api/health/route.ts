@@ -1,5 +1,7 @@
-import { FastAPI, HTTPException, Request, Response } from 'fastapi';
-import { Depends, Post } from 'fastapi.decorator';
+// app/api/health/route.ts
+
+import { FastAPI, HTTPException } from 'fastapi';
+import { Depends } from 'fastapi.decorator';
 import { MongoClient } from 'mongodb';
 
 // Import custom dependencies
@@ -11,7 +13,7 @@ const app = new FastAPI();
  * Route handler for pinging the MongoDB connection.
  * @returns A JSON object indicating whether the MongoDB connection is healthy.
  */
-app.post('/health/check', async (request: Request, response: Response) => {
+app.get('/health/check', async (request: Request, response: Response) => {
   try {
     const client: MongoClient = await getMongoClient();
     await client.db('test').command({ ping: 1 });
