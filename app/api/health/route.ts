@@ -1,10 +1,7 @@
 // app/api/health/route.ts
 
-import { FastAPI, HTTPException } from 'fastapi';
-import { Depends } from 'fastapi.decorator';
+import { FastAPI } from 'fastapi';
 import { MongoClient } from 'mongodb';
-
-// Import custom dependencies
 import getMongoClient from '@/lib/mongodb.ts';
 
 const app = new FastAPI();
