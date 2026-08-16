@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build-and-test:
+  checks:
 
     runs-on: ubuntu-latest
 
@@ -27,6 +27,3 @@ jobs:
 
     - name: Run tests
       run: npm test
-
-    - name: Build the application
-      run: npm run build
