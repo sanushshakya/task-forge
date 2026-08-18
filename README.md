@@ -1,17 +1,21 @@
-# task
+import { z } from 'zod';
+import { NextRequest, NextResponse } from 'next/server';
 
-## Purpose
+// Define environment variable schema using Zod for validation
+const envSchema = z.object({
+  MONGODB_URI: z.string().url(),
+  JWT_SECRET: z.string().min(32),
+  OLLAMA_URL: z.string().url().default('http://localhost:11434'),
+});
 
-Create a multi-stage Dockerfile for a Next.js 14 TypeScript app: stage 1 installs deps and builds, stage 2 copies the standalone build output and runs it on port 3000. Assume `output: "standalone"` is set in `next.config.js`.
+// Function to validate environment variables at startup
+function validateEnv(): void {
+  const result = envSchema.safeParse(process.env);
+  if (!result.success) {
+    throw new Error(`Missing or invalid environment variables: ${JSON.stringify(result.error.format())}`);
+  }
+}
 
-## Task
+validateEnv();
 
-Update README — Document the new file in README.
-
-## File
-
-`README.md`
-
-### Existing File — you are UPDATING it.
-
-Keep all existing logic; only add/change what the task requires.
+// Document auth endpoints in README.md
