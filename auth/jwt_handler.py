@@ -1,53 +1,55 @@
-import jwt
-from datetime import datetime, timedelta
+import { z } from 'zod';
+import jwt from 'jsonwebtoken';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-class JWTHandler:
-    """
-    Class to handle JWT encoding and decoding with expiration.
-    """
+// Define environment variables using Zod schema for validation
+const envSchema = z.object({
+  MONGODB_URI: z.string().url(),
+  JWT_SECRET: z.string().min(32),
+  OLLAMA_URL: z.string().url().default('http://localhost:11434'),
+});
 
-    @staticmethod
-    def encode_token(user_id: str) -> str:
-        """
-        Encode a user ID into a JWT token with an expiration time.
+if (!envSchema.safeParse(process.env).success) {
+  throw new Error('Missing or invalid environment variables');
+}
 
-        Args:
-            user_id (str): The user ID to encode.
+const { JWT_SECRET } = envSchema.parse(process.env);
 
-        Returns:
-            str: The encoded JWT token.
-        """
-        payload = {
-            'user_id': user_id,
-            'exp': datetime.utcnow() + timedelta(hours=1),  # Token expires in 1 hour
-        }
-        token = jwt.encode(payload, 'SECRET_KEY', algorithm='HS256')
-        return token
+// Define types for JWT token and user ID
+export interface JwtToken {
+  userId: string;
+  exp: number; // Expiration time in seconds
+}
 
-    @staticmethod
-    def decode_token(token: str) -> dict:
-        """
-        Decode a JWT token and extract the user ID.
+/**
+ * Class to handle JWT encoding and decoding with expiration.
+ */
+class JwtHandler {
+  /**
+   * Encodes a user's ID into a JWT token with an expiration time.
+   * @param {string} userId - The user ID to encode.
+   * @returns {string} - The encoded JWT token.
+   */
+  public static encodeToken(userId: string): string {
+    const payload: JwtToken = {
+      userId,
+      exp: Math.floor(Date.now() / 1000) + 3600, // Expires in 1 hour
+    };
+    return jwt.sign(payload, JWT_SECRET);
+  }
 
-        Args:
-            token (str): The JWT token to decode.
+  /**
+   * Decodes a JWT token and returns the user ID.
+   * @param {string} token - The JWT token to decode.
+   * @returns {JwtToken} - The decoded JWT token payload containing the user ID and expiration time.
+   */
+  public static decodeToken(token: string): JwtToken {
+    try {
+      return jwt.verify(token, JWT_SECRET) as JwtToken;
+    } catch (error) {
+      throw new Error('Invalid or expired token');
+    }
+  }
+}
 
-        Returns:
-            dict: A dictionary containing the decoded payload, or an error if decoding fails.
-        """
-        try:
-            payload = jwt.decode(token, 'SECRET_KEY', algorithms=['HS256'])
-            return {'user_id': payload['user_id']}
-        except jwt.ExpiredSignatureError:
-            return {'error': 'Token has expired'}
-        except jwt.InvalidTokenError:
-            return {'error': 'Invalid token'}
-
-# Example usage
-if __name__ == "__main__":
-    user_id = "12345"
-    encoded_token = JWTHandler.encode_token(user_id)
-    print(f"Encoded Token: {encoded_token}")
-
-    decoded_payload = JWTHandler.decode_token(encoded_token)
-    print(f"Decoded Payload: {decoded_payload}")
+export default JwtHandler;
