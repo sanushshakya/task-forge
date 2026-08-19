@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import { MongoClient } from 'mongodb';
+import { MONGODB_URI } from '../env';
 
-// Create a MongoDB client instance
-const uri = process.env.MONGODB_URI as string;
+// Create a MongoDB client instance using the validated URI
+const uri = MONGODB_URI as string;
 const options = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
