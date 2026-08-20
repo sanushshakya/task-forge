@@ -2,7 +2,7 @@
 
 ## Project Description
 
-This project is a RESTful API built using TypeScript and designed to manage user data, including settings for AI summaries and weekly insights. The application leverages MongoDB for data storage and utilizes JWT for authentication. 
+This project is a RESTful API built using TypeScript and designed to manage user data, including settings for AI summaries and weekly insights. The application leverages MongoDB for data storage and utilizes JWT for authentication.
 
 ## Tech Stack
 
@@ -78,3 +78,5 @@ This command will start all required services. Ensure that a local Ollama instan
 AI features (e.g., weekly insights, summary generation) depend on a local Ollama instance running `qwen2.5-coder:7b`. Ensure this service is up and running before using these endpoints.
 
 For further details and development instructions, refer to the project documentation or contact the project maintainers.
+
+**Note:** AI features are not supported when deploying on Vercel due to limitations in environment configurations.
