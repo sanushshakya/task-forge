@@ -1,16 +1,31 @@
-// models/Settings.ts
+// models/User.ts
 
 /**
- * Represents a user's settings including preferences for AI summaries and weekly insights.
+ * Represents a user in the application with an optional team association.
  */
-export interface Settings {
+export interface User {
   /**
-   * Indicates whether AI summary generation is enabled.
+   * The unique identifier for the user.
    */
-  aiSummaryEnabled: boolean;
+  _id: string;
 
   /**
-   * Indicates whether weekly insight generation is enabled.
+   * The username of the user.
    */
-  weeklyInsightEnabled: boolean;
+  username: string;
+
+  /**
+   * The email address of the user.
+   */
+  email: string;
+
+  /**
+   * Indicates whether the user's account is active.
+   */
+  isActive: boolean;
+
+  /**
+   * Optional reference to a team associated with the user.
+   */
+  teamId?: string; // Updated to include optional teamId field
 }
