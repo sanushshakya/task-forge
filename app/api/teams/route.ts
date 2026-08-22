@@ -2,7 +2,7 @@
 
 import { FastAPI, Request, Response, HTTPException } from 'fastapi';
 import { Team } from '../../models';
-import { createTeam } from '../teams.service';
+import { createTeam, updateUserIdInDatabase } from '../teams.service';
 import { verifyToken } from '../../../auth/dependencies'; // Import the JWT verification function
 
 /**
@@ -48,6 +48,7 @@ export default function (app: FastAPI) {
       teamData.createdBy = userId; // Add the createdBy field with the authenticated user's ID
 
       const team = await createTeam(teamData);
+      await updateUserIdInDatabase(userId, team._id); // Update the user's teamId in the database
       return response.status(201).json(team);
     } catch (error) {
       if (error instanceof HTTPException) {
