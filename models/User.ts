@@ -1,5 +1,4 @@
-import mongoose from 'mongoose';
-import bcrypt from 'bcrypt';
+// models/User.ts
 
 /**
  * Define a Mongoose schema for the User model.
@@ -8,6 +7,7 @@ import bcrypt from 'bcrypt';
  * @property reset_token - A token for password reset purposes, optional.
  * @property reset_token_expiry - The expiry time for the password reset token, optional.
  * @property createdAt - The timestamp when the user was created, defaulting to the current date.
+ * @property teamId - An optional reference to a Team model, allowing users to be associated with a team.
  */
 const userSchema = new mongoose.Schema({
   email: {
@@ -28,6 +28,11 @@ const userSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  teamId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Team',
+    required: false, // Make the field optional
   },
 });
 
