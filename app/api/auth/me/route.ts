@@ -17,11 +17,11 @@ export async function GET(request: Request) {
       throw new HTTPException(401, 'Unauthorized');
     }
 
-    // Decode the JWT token to get the user ID
+    // Decode the JWT token to get the user ID and teamId
     const token = authHeader.substring(7);
     const decodedToken = decodeToken(token);
 
-    return { userId: decodedToken.userId };
+    return { userId: decodedToken.userId, teamId: decodedToken.teamId };
   } catch (error) {
     if (error instanceof HTTPException) {
       throw error;
