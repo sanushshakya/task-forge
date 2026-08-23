@@ -1,3 +1,5 @@
+// README.md
+
 # Task API Documentation
 
 ## Project Description
@@ -72,6 +74,12 @@ This command will start all required services. Ensure that a local Ollama instan
 - **Method**: POST  
   **Path**: `/api/summary`  
   **Description**: Generates entry summaries using the Ollama API. AI features require a local Ollama instance running `qwen2.5-coder:7b`.
+
+### Team Endpoints
+
+- **Method**: POST  
+  **Path**: `/api/teams/invite`  
+  **Description**: Invites a user by email to join the authenticated user's team as a member if the requester is the team owner.
 
 ## Notes
 
