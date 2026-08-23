@@ -1,34 +1,27 @@
-import { z } from 'zod';
+// schemas/auth.py
 
-// Define environment variables using Zod
-export const envSchema = z.object({
-  MONGODB_URI: z.string().url(),
-  JWT_SECRET: z.string().min(32),
-  OLLAMA_URL: z.string().url().default('http://localhost:11434'),
-});
-
-const envResult = envSchema.safeParse(process.env);
-
-if (!envResult.success) {
-  const missingVars = envResult.error.issues.map((issue) => issue.path.join('.')).join(', ');
-  throw new Error(`Missing environment variables: ${missingVars}`);
-}
-
-export const { MONGODB_URI, JWT_SECRET, OLLAMA_URL } = envResult.data;
-
-// auth/schemas/auth.py
-
-import { BaseModel } from 'pydantic';
+from pydantic import BaseModel
+from datetime import datetime
 
 class LoginRequest(BaseModel):
-    username: str
+    """
+    Schema for login request containing email and password.
+    """
+    email: str
     password: str
 
 class RegisterRequest(BaseModel):
+    """
+    Schema for registration request containing username, email, and password.
+    """
     username: str
     email: str
     password: str
 
 class TokenResponse(BaseModel):
+    """
+    Schema for the token response containing access token and expiration time.
+    """
     access_token: str
     token_type: str
+    expires_at: datetime
