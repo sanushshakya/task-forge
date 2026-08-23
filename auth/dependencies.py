@@ -1,21 +1,19 @@
-// auth/dependencies.ts
+// auth/dependencies.py
 
-import { JWT_SECRET } from '../lib/env';
 import jwt from 'jsonwebtoken';
 
 /**
  * Decodes a JWT token and returns the current user's ID.
- * 
- * @param token - The JWT token to decode.
- * @returns The user's ID if decoding is successful, throws an error otherwise.
+ * @param {string} token - The JWT token to decode.
+ * @returns {string | undefined} - The decoded user ID or undefined if decoding fails.
  */
-export const decodeToken = (token: string): string => {
+export const get_current_user = (token: string): string | undefined => {
   try {
-    // Verify the JWT token using the secret key
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-    return decoded.userId;
+    // Decode the JWT token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+    return decoded.userId as string;
   } catch (error) {
-    // Throw a clear error if token is invalid or has expired
-    throw new Error('Invalid or expired token');
+    // Return undefined if decoding fails
+    return undefined;
   }
 };
