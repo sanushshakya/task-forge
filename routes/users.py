@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import User from '@/models/User';
+import Team from '@/models/Team';
 import { get_current_user } from '@/auth/dependencies.py';
 
 /**
