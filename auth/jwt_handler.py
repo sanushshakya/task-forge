@@ -1,55 +1,76 @@
-import { z } from 'zod';
-import jwt from 'jsonwebtoken';
-import { NextApiRequest, NextApiResponse } from 'next';
+from fastapi import FastAPI, Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+from typing import Optional
+from jose import JWTError, jwt
+from datetime import datetime, timedelta
 
-// Define environment variables using Zod schema for validation
-const envSchema = z.object({
-  MONGODB_URI: z.string().url(),
-  JWT_SECRET: z.string().min(32),
-  OLLAMA_URL: z.string().url().default('http://localhost:11434'),
-});
+# Import the User model from models/index.ts
+from models import User
+from auth.dependencies import get_current_user
+from lib.env import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from lib.auth.types import TokenData
 
-if (!envSchema.safeParse(process.env).success) {
-  throw new Error('Missing or invalid environment variables');
-}
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-const { JWT_SECRET } = envSchema.parse(process.env);
+app = FastAPI()
 
-// Define types for JWT token and user ID
-export interface JwtToken {
-  userId: string;
-  exp: number; // Expiration time in seconds
-}
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    """
+    Creates a JWT access token with the provided data and optional expiration time.
+    
+    Args:
+        data (dict): The data to be encoded in the token.
+        expires_delta (Optional[timedelta]): The time until the token expires. Defaults to None.
+        
+    Returns:
+        str: The encoded JWT access token.
+    """
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
-/**
- * Class to handle JWT encoding and decoding with expiration.
- */
-class JwtHandler {
-  /**
-   * Encodes a user's ID into a JWT token with an expiration time.
-   * @param {string} userId - The user ID to encode.
-   * @returns {string} - The encoded JWT token.
-   */
-  public static encodeToken(userId: string): string {
-    const payload: JwtToken = {
-      userId,
-      exp: Math.floor(Date.now() / 1000) + 3600, // Expires in 1 hour
-    };
-    return jwt.sign(payload, JWT_SECRET);
-  }
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    """
+    Retrieves the current user from the JWT token.
+    
+    Args:
+        token (str): The JWT access token.
+        
+    Returns:
+        User: The current user.
+    """
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+        token_data = TokenData(email=email)
+    except JWTError:
+        raise credentials_exception
+    user = await get_user_by_email(email=token_data.email)
+    if user is None:
+        raise credentials_exception
+    return user
 
-  /**
-   * Decodes a JWT token and returns the user ID.
-   * @param {string} token - The JWT token to decode.
-   * @returns {JwtToken} - The decoded JWT token payload containing the user ID and expiration time.
-   */
-  public static decodeToken(token: string): JwtToken {
-    try {
-      return jwt.verify(token, JWT_SECRET) as JwtToken;
-    } catch (error) {
-      throw new Error('Invalid or expired token');
-    }
-  }
-}
-
-export default JwtHandler;
+async def get_user_by_email(email: str):
+    """
+    Retrieves a user by their email address.
+    
+    Args:
+        email (str): The email address of the user.
+        
+    Returns:
+        User: The user with the provided email address, if found.
+    """
+    # Placeholder for actual database query logic
+    return await User.find_one({"email": email})
