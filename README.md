@@ -27,9 +27,10 @@ Ensure you have a `.env` file at the root of your project with the following env
 MONGODB_URI=<your_mongodb_connection_string>
 JWT_SECRET=<your_jwt_secret>
 OLLAMA_URL=http://localhost:11434
+STRIPE_API_KEY=<your_stripe_api_key>
 ```
 
-Replace `<your_mongodb_connection_string>` and `<your_jwt_secret>` with appropriate values.
+Replace `<your_mongodb_connection_string>`, `<your_jwt_secret>`, and `<your_stripe_api_key>` with appropriate values.
 
 ### Docker Setup
 
