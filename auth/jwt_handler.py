@@ -1,76 +1,64 @@
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
-from typing import Optional
-from jose import JWTError, jwt
+# auth/jwt_handler.py
+
+import jwt
 from datetime import datetime, timedelta
+from typing import Optional
 
-# Import the User model from models/index.ts
-from models import User
-from auth.dependencies import get_current_user
-from lib.env import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
-from lib.auth.types import TokenData
+# Import user model for decoding JWT payload
+from models.User import User
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+# Secret key for JWT encoding/decoding
+JWT_SECRET_KEY = 'your_secret_key_here'
+ALGORITHM = "HS256"
 
-app = FastAPI()
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def encode_jwt(payload: dict) -> str:
     """
-    Creates a JWT access token with the provided data and optional expiration time.
+    Encode a dictionary containing user information into a JWT token.
     
     Args:
-        data (dict): The data to be encoded in the token.
-        expires_delta (Optional[timedelta]): The time until the token expires. Defaults to None.
-        
+        payload (dict): Dictionary containing user data to be encoded.
+    
     Returns:
-        str: The encoded JWT access token.
+        str: Encoded JWT token.
     """
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    # Set expiration time for the token
+    expire = datetime.utcnow() + timedelta(days=1)
+    payload.update({"exp": expire})
+    
+    # Encode the payload and return as a JWT token
+    encoded_jwt = jwt.encode(payload, JWT_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+def decode_jwt(token: str) -> Optional[dict]:
     """
-    Retrieves the current user from the JWT token.
+    Decode a JWT token to retrieve user information.
     
     Args:
-        token (str): The JWT access token.
-        
+        token (str): JWT token to be decoded.
+    
     Returns:
-        User: The current user.
+        dict or None: Decoded payload if successful, otherwise None.
     """
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        if email is None:
-            raise credentials_exception
-        token_data = TokenData(email=email)
-    except JWTError:
-        raise credentials_exception
-    user = await get_user_by_email(email=token_data.email)
-    if user is None:
-        raise credentials_exception
-    return user
+        # Decode the JWT token and return the payload
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        # Token has expired
+        return None
+    except jwt.InvalidTokenError:
+        # Invalid token
+        return None
 
-async def get_user_by_email(email: str):
-    """
-    Retrieves a user by their email address.
+# Example usage
+if __name__ == "__main__":
+    user_payload = {"user_id": "123", "username": "john_doe"}
+    encoded_token = encode_jwt(user_payload)
+    print(f"Encoded JWT: {encoded_token}")
     
-    Args:
-        email (str): The email address of the user.
-        
-    Returns:
-        User: The user with the provided email address, if found.
-    """
-    # Placeholder for actual database query logic
-    return await User.find_one({"email": email})
+    decoded_payload = decode_jwt(encoded_token)
+    if decoded_payload:
+        print(f"Decoded Payload: {decoded_payload}")
+```
+
+This Python script provides functions to encode and decode JSON Web Tokens (JWTs) using a secret key. The `encode_jwt` function takes a dictionary containing user information and returns an encoded JWT token with an expiration time. The `decode_jwt` function attempts to decode a JWT token and return the payload, handling exceptions for expired or invalid tokens.
