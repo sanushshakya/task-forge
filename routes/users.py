@@ -1,3 +1,6 @@
+/**
+ * Routes for handling user-related operations.
+ */
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import User from '@/models/User';
