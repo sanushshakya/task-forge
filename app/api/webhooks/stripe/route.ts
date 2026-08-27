@@ -35,6 +35,23 @@ router.post(
     const { type, data } = req.body;
     const { id: subscriptionId, status } = data.object;
 
+    // Verify the Stripe webhook signature
+    const sigHeader = req.headers['stripe-signature'];
+    if (!sigHeader) {
+      return res.status(400).json({ message: 'Missing Stripe signature header' });
+    }
+
+    try {
+      stripe.webhooks.constructEvent(
+        JSON.stringify(req.body),
+        sigHeader,
+        process.env.STRIPE_WEBHOOK_SECRET || ''
+      );
+    } catch (error) {
+      console.error('Stripe webhook signature verification failed:', error);
+      return res.status(400).json({ message: 'Invalid Stripe signature' });
+    }
+
     try {
       let subscription = await Subscription.findById(subscriptionId);
 
