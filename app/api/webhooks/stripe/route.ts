@@ -60,7 +60,7 @@ router.post(
       }
 
       switch (type) {
-        case 'invoice.payment_succeeded':
+        case 'checkout.session.completed':
           // Update subscription status to active
           subscription.active = true;
           break;
