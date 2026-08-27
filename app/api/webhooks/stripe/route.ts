@@ -70,6 +70,11 @@ router.post(
           subscription.active = false;
           break;
 
+        case 'customer.subscription.updated':
+          // Update subscription status based on the new status received from Stripe
+          subscription.status = status as Subscription['status'];
+          break;
+
         default:
           return res.status(400).json({ message: 'Unsupported event type' });
       }
