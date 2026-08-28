@@ -82,6 +82,12 @@ This command will start all required services. Ensure that a local Ollama instan
   **Path**: `/api/teams/invite`  
   **Description**: Invites a user by email to join the authenticated user's team as a member if the requester is the team owner.
 
+### Billing Portal Route
+
+- **Method**: GET  
+  **Path**: `/api/billing/portal`  
+  **Description**: Redirects authenticated users to their Stripe billing portal for managing subscriptions. Requires a valid JWT token.
+
 ## Notes
 
 AI features (e.g., weekly insights, summary generation) depend on a local Ollama instance running `qwen2.5-coder:7b`. Ensure this service is up and running before using these endpoints.
