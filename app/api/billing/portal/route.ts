@@ -32,7 +32,7 @@ export const getBillingPortalUrl = async (req: Request, res: Response) => {
     // Create a session for the billing portal
     const session = await stripe.billingPortal.sessions.create({
       customer: team.stripeCustomerId, // Use the team's Stripe customer ID
-      return_url: `${process.env.FRONTEND_URL}/dashboard`, // URL to redirect after using the portal
+      return_url: `${process.env.FRONTEND_URL}/billing`, // Updated return URL to /billing
     });
 
     // Return the session URL to the client
