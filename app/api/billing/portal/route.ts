@@ -3,7 +3,7 @@
 import { Request, Response } from 'express';
 import Stripe from 'stripe';
 import { authMiddleware } from '../../api/middleware/auth';
-import { getUserById } from '../../auth/dependencies';
+import { getUserById, getTeamByUserId } from '../../auth/dependencies';
 
 /**
  * Route handler for generating and returning a Stripe billing portal URL.
@@ -23,9 +23,15 @@ export const getBillingPortalUrl = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'User email not found' });
     }
 
+    // Get the team associated with the user
+    const team = await getTeamByUserId(userId);
+    if (!team || !team.stripeCustomerId) {
+      return res.status(400).json({ error: 'Team or Stripe customer ID not found' });
+    }
+
     // Create a session for the billing portal
     const session = await stripe.billingPortal.sessions.create({
-      customer: user.stripeCustomerId, // Assuming the user has a Stripe customer ID
+      customer: team.stripeCustomerId, // Use the team's Stripe customer ID
       return_url: `${process.env.FRONTEND_URL}/dashboard`, // URL to redirect after using the portal
     });
 
