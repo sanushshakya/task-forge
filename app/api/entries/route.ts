@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import EntryModel from '../models/Entry';
 import authMiddleware from '../middleware/auth';
+import checkEntryLimit from '../utils/checkEntryLimit'; // Import the entry limit check utility
 
 // Define validation rules for the entry retrieval request query parameters
 const validateEntryRetrieval = [
@@ -23,6 +24,12 @@ export const getEntries = async (req: Request, res: Response) => {
 
   try {
     const userId = (req.user as any)._id; // Cast to any to access _id property safely
+
+    // Check the entry limit before saving a new entry
+    const isLimitReached = await checkEntryLimit(userId);
+    if (!isLimitReached) {
+      return res.status(402).json({ error: "Free plan limit reached, upgrade to Pro" });
+    }
 
     // Define the query object for filtering entries
     let query: { userId: string } & Partial<{ startDate: Date, endDate: Date }> = { userId };
@@ -55,6 +62,12 @@ export const getEntries = async (req: Request, res: Response) => {
 export const getLastFourteenEntries = async (req: Request, res: Response) => {
   try {
     const userId = (req.user as any)._id; // Cast to any to access _id property safely
+
+    // Check the entry limit before saving a new entry
+    const isLimitReached = await checkEntryLimit(userId);
+    if (!isLimitReached) {
+      return res.status(402).json({ error: "Free plan limit reached, upgrade to Pro" });
+    }
 
     // Define the query object for retrieving the last 14 entries
     const query = { userId };
