@@ -81,10 +81,3 @@ export const getLastFourteenEntries = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'Server error' });
   }
 };
-
-// Define the route for entry retrieval
-const router = require('express').Router();
-router.get('/entries', authMiddleware, validateEntryRetrieval, getEntries);
-router.get('/last-fourteen-entries', authMiddleware, getLastFourteenEntries);
-
-module.exports = router;
