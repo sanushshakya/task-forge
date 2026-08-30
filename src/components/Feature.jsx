@@ -1,107 +1,56 @@
-import React, { useState } from 'react';
-import { fetch } from 'node-fetch';
+// src/components/BillingStatus.tsx
 
-// Define TypeScript types for the form state
-interface EntryFormState {
-  task: string;
-  mood: number;
-  notes: string;
-}
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
-const EntryForm: React.FC = () => {
-  // Initialize the form state with useState
-  const [formState, setFormState] = useState<EntryFormState>({
-    task: '',
-    mood: 3,
-    notes: ''
-  });
+/**
+ * BillingStatus component fetches and displays the team's current plan and status.
+ * It also provides a button to either check out for the Pro Plan or open the billing portal.
+ */
+const BillingStatus: React.FC = () => {
+  const [plan, setPlan] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Handle input changes and update the form state accordingly
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = event.target;
-    setFormState(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
-  };
+  useEffect(() => {
+    // Fetch the team's current plan and status from the API
+    const fetchBillingStatus = async () => {
+      try {
+        const response = await axios.get('/api/billing/status');
+        setPlan(response.data.plan);
+        setLoading(false);
+      } catch (error) {
+        console.error('Failed to fetch billing status:', error);
+        setLoading(false);
+      }
+    };
 
-  // Handle form submission and send data to the server via POST request
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
+    fetchBillingStatus();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  const handleCheckout = async () => {
     try {
-      if (!formState.task.trim()) {
-        throw new Error('Task cannot be empty');
+      if (plan === 'Free Plan') {
+        await axios.post('/api/billing/checkout');
+      } else if (plan === 'Pro Plan') {
+        await axios.post('/api/billing/portal');
       }
-      if (formState.mood < 1 || formState.mood > 5) {
-        throw new Error('Mood must be between 1 and 5');
-      }
-
-      const response = await fetch('/api/entries', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formState)
-      });
-      if (!response.ok) {
-        throw new Error('Failed to submit entry');
-      }
-      // Reset the form state after successful submission
-      setFormState({
-        task: '',
-        mood: 3,
-        notes: ''
-      });
     } catch (error) {
-      console.error('Error submitting entry:', error);
+      console.error('Failed to handle checkout:', error);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      {/* Task input field */}
-      <div>
-        <label htmlFor="task">Task:</label>
-        <input
-          type="text"
-          id="task"
-          name="task"
-          value={formState.task}
-          onChange={handleInputChange}
-          required
-        />
-      </div>
-
-      {/* Mood slider */}
-      <div>
-        <label htmlFor="mood">Mood (1-5):</label>
-        <input
-          type="range"
-          id="mood"
-          name="mood"
-          min="1"
-          max="5"
-          value={formState.mood}
-          onChange={handleInputChange}
-          required
-        />
-      </div>
-
-      {/* Notes textarea */}
-      <div>
-        <label htmlFor="notes">Notes:</label>
-        <textarea
-          id="notes"
-          name="notes"
-          value={formState.notes}
-          onChange={handleInputChange}
-        ></textarea>
-      </div>
-
-      {/* Submit button */}
-      <button type="submit">Submit</button>
-    </form>
+    <div>
+      {plan ? <p>Your current plan is: {plan}</p> : <p>No plan information available.</p>}
+      <button onClick={handleCheckout} disabled={!plan}>
+        {plan === 'Free Plan' ? 'Upgrade to Pro' : 'Open Billing Portal'}
+      </button>
+    </div>
   );
 };
 
-export default EntryForm;
+export default BillingStatus;
