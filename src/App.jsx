@@ -1,93 +1,88 @@
-// src/components/EntryForm.tsx
+// src/components/BillingStatus.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-interface Entry {
-  id: string;
-  taskList: string[];
-  mood: number;
-  notes: string;
-}
+const BillingStatus: React.FC = () => {
+  const [status, setStatus] = useState<string | null>(null);
 
-const EntryForm: React.FC = () => {
-  const [taskList, setTaskList] = useState<string[]>([]);
-  const [mood, setMood] = useState<number>(3);
-  const [notes, setNotes] = useState<string>('');
+  useEffect(() => {
+    // Fetch the team's current plan and status from the API
+    fetch('/api/billing/status')
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.plan === 'free') {
+          setStatus('Free Plan');
+        } else if (data.plan === 'pro') {
+          setStatus('Pro Plan');
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching billing status:', error);
+        setStatus(null);
+      });
+  }, []);
 
-  // Function to add a task to the list
-  const handleAddTask = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (e.target.value.trim() !== '') {
-        setTaskList([...taskList, e.target.value]);
-        e.target.value = '';
-      }
-    }
-  };
-
-  // Function to remove a task from the list
-  const handleRemoveTask = (index: number) => {
-    setTaskList(taskList.filter((_, i) => i !== index));
-  };
-
-  // Function to toggle mood slider
-  const handleMoodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMood(Number(e.target.value));
-  };
-
-  // Function to handle form submission
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-      const response = await fetch('/api/entries', {
+  const handleCheckout = () => {
+    // POST to /api/billing/checkout if the plan is free
+    if (status === 'Free Plan') {
+      fetch('/api/billing/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          taskList,
-          mood,
-          notes,
-        }),
+      }).then((response) => {
+        if (!response.ok) {
+          alert('Failed to initiate checkout.');
+        }
       });
-
-      if (response.ok) {
-        // Handle success
-        alert('Entry submitted successfully!');
-      } else {
-        // Handle error
-        alert('Failed to submit entry.');
-      }
-    } catch (error) {
-      console.error('Error submitting entry:', error);
-      alert('An error occurred while submitting the entry.');
+    } else if (status === 'Pro Plan') {
+      // POST to /api/billing/portal if the plan is pro
+      fetch('/api/billing/portal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then((response) => {
+        if (!response.ok) {
+          alert('Failed to redirect to billing portal.');
+        }
+      });
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <h2>Task List</h2>
-        {taskList.map((task, index) => (
-          <div key={index}>
-            <span>{task}</span>
-            <button type="button" onClick={() => handleRemoveTask(index)}>Remove</button>
-          </div>
-        ))}
-        <input type="text" placeholder="Add a task" onKeyDown={handleAddTask} />
-      </div>
-      <div>
-        <h2>Mood Slider (1-5)</h2>
-        <input type="range" min="1" max="5" value={mood} onChange={handleMoodChange} />
-        <span>{mood}</span>
-      </div>
-      <div>
-        <h2>Notes</h2>
-        <textarea rows={4} cols={50} value={notes} onChange={(e) => setNotes(e.target.value)}></textarea>
-      </div>
-      <button type="submit">Submit Entry</button>
-    </form>
+    <div>
+      {status ? (
+        <div>
+          <h2>Billing Status</h2>
+          <p>{status}</p>
+          <button onClick={handleCheckout}>Upgrade/Manage Plan</button>
+        </div>
+      ) : (
+        <p>Loading billing status...</p>
+      )}
+    </div>
   );
 };
 
-export default EntryForm;
+export default BillingStatus;
+```
+
+```typescript
+// src/App.jsx
+
+import React from 'react';
+import EntryForm from './components/EntryForm';
+import BillingStatus from './components/BillingStatus';
+
+const App: React.FC = () => {
+  return (
+    <div>
+      <h1>Task Tracker</h1>
+      <EntryForm />
+      <BillingStatus />
+    </div>
+  );
+};
+
+export default App;
