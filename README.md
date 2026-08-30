@@ -82,6 +82,18 @@ This command will start all required services. Ensure that a local Ollama instan
   **Path**: `/api/teams/invite`  
   **Description**: Invites a user by email to join the authenticated user's team as a member if the requester is the team owner.
 
+### Billing Status Endpoint
+
+- **Method**: GET  
+  **Path**: `/api/billing/status`  
+  **Description**: Retrieves the current plan and status of the authenticated user's subscription.
+
+### Billing Checkout Endpoint
+
+- **Method**: POST  
+  **Path**: `/api/billing/checkout`  
+  **Description**: Initiates a billing checkout for the authenticated user's subscription. Redirects to the Stripe payment page.
+
 ### Billing Portal Route
 
 - **Method**: GET  
@@ -94,4 +106,4 @@ AI features (e.g., weekly insights, summary generation) depend on a local Ollama
 
 For further details and development instructions, refer to the project documentation or contact the project maintainers.
 
-**Note:** AI features are not supported when deploying on Vercel due to limitations in environment configurations.
+**Note:** AI features are not
