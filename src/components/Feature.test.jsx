@@ -1,91 +1,28 @@
-import React from 'react';
-import { useState } from 'react';
+import { render } from '@testing-library/react';
+import Feature from '../components/Feature';
 
-// Define TypeScript types for the form state
-interface EntryFormState {
-  task: string;
-  mood: number;
-  notes: string;
-}
+describe('Feature Component', () => {
+  it('renders Free Plan when user is on free plan', async () => {
+    const mockData = {
+      plan: 'free',
+      canUpgrade: true,
+    };
 
-const EntryForm = () => {
-  const [formState, setFormState] = useState<EntryFormState>({
-    task: '',
-    mood: 3,
-    notes: ''
+    const { getByText, getByRole } = render(<Feature data={mockData} />);
+
+    expect(getByText('Free Plan')).toBeInTheDocument();
+    expect(getByRole('button').textContent).toBe('Upgrade to Pro');
   });
 
-  // Handle form input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormState({
-      ...formState,
-      [e.target.name]: e.target.value
-    });
-  };
+  it('renders Pro Plan when user is on pro plan', async () => {
+    const mockData = {
+      plan: 'pro',
+      canUpgrade: false,
+    };
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await fetch('/api/entries', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formState)
-      });
-      if (!response.ok) {
-        throw new Error('Failed to create entry');
-      }
-      setFormState({
-        task: '',
-        mood: 3,
-        notes: ''
-      });
-    } catch (error) {
-      console.error('Error submitting form:', error);
-    }
-  };
+    const { getByText } = render(<Feature data={mockData} />);
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="task">Task:</label>
-        <input
-          type="text"
-          id="task"
-          name="task"
-          value={formState.task}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="mood">Mood (1-5):</label>
-        <input
-          type="range"
-          id="mood"
-          name="mood"
-          min="1"
-          max="5"
-          value={formState.mood}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="notes">Notes:</label>
-        <textarea
-          id="notes"
-          name="notes"
-          value={formState.notes}
-          onChange={handleChange}
-          required
-        ></textarea>
-      </div>
-      <button type="submit">Submit</button>
-    </form>
-  );
-};
-
-export default EntryForm;
+    expect(getByText('Pro Plan')).toBeInTheDocument();
+    expect(() => getByRole('button')).toThrow(/Unable to find an element with role "button"/);
+  });
+});
