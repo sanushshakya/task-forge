@@ -1,5 +1,3 @@
-// README.md
-
 # Task API Documentation
 
 ## Project Description
@@ -98,12 +96,44 @@ This command will start all required services. Ensure that a local Ollama instan
 
 - **Method**: GET  
   **Path**: `/api/billing/portal`  
-  **Description**: Redirects authenticated users to their Stripe billing portal for managing subscriptions. Requires a valid JWT token.
+  **Description**: Redirects authenticated users to their Stripe billing portal 
 
-## Notes
+## Configuration and Usage of manifest.json
 
-AI features (e.g., weekly insights, summary generation) depend on a local Ollama instance running `qwen2.5-coder:7b`. Ensure this service is up and running before using these endpoints.
+To configure your application with a custom `manifest.json` file, follow these steps:
 
-For further details and development instructions, refer to the project documentation or contact the project maintainers.
+1. Create or update the `public/manifest.json` file in your project.
+2. Add the following JSON content to the `manifest.json` file:
 
-**Note:** AI features are not
+```json
+{
+  "name": "YourAppName",
+  "short_name": "App",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007bff",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "apple_web_app": {
+    "capable": true,
+    "status_bar_style": "black",
+    "title": "YourAppName"
+  }
+}
+```
+
+3. Replace the values with your application's details.
+4. Ensure that the `icons` section includes paths to your app's icons in different sizes.
+
+By following these steps, you can configure your Next.js application to have a custom manifest file that enhances the user experience and improves PWA (Progressive Web App) functionality.
