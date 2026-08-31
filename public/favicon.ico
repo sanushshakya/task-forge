@@ -1,0 +1,102 @@
+// public/favicon.ico
+
+// This is a placeholder for the favicon.ico file.
+// Replace this with your actual favicon image in .ico format.
+```
+
+```typescript
+// app/layout.tsx
+
+import { Inter } from 'next/font/google';
+import Head from 'next/head';
+import { FC, ReactNode } from 'react';
+
+const inter = Inter({ subsets: ['latin'] });
+
+interface LayoutProps {
+  children?: ReactNode;
+}
+
+const Layout: FC<LayoutProps> = ({ children }) => (
+  <>
+    <Head>
+      <meta charSet="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Your App Title</title>
+      <link rel="icon" href="/favicon.ico" />
+      <meta
+        name="description"
+        content="A brief description of your app."
+      />
+      <meta property="og:title" content="Your App Title" />
+      <meta property="og:description" content="A brief description of your app." />
+      <meta property="og:url" content="https://yourapp.com" />
+      <meta property="og:image" content="/path/to/your/image.jpg" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content="Your App Title" />
+      <meta name="twitter:description" content="A brief description of your app." />
+      <meta name="twitter:image" content="/path/to/your/image.jpg" />
+    </Head>
+    <div className={inter.className}>
+      {children}
+    </div>
+  </>
+);
+
+export default Layout;
+```
+
+```json
+// public/manifest.json
+
+{
+  "name": "Your App Title",
+  "short_name": "YourApp",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "scope": "/"
+}
+```
+
+```typescript
+// app/api/settings/route.ts
+
+import { NextRequest, NextResponse } from 'next/server';
+import { User } from '@/models/User';
+
+export async function GET(request: NextRequest) {
+  const user = await getUserFromToken(request); // Assuming you have a function to get the user from the token
+
+  if (!user) {
+    return new NextResponse('Unauthorized', { status: 401 });
+  }
+
+  return NextResponse.json({
+    _id: user._id,
+    username: user.username,
+    email: user.email,
+    isActive: user.isActive,
+    teamId: user.teamId || null
+  });
+}
+```
+
+```typescript
+// public/icon.png
+
+// This is a placeholder for your app icon.
+// Replace this with your actual icon image in PNG format.
