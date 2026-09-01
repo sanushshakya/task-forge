@@ -4,6 +4,8 @@
 
 This project is a RESTful API built using TypeScript and designed to manage user data, including settings for AI summaries and weekly insights. The application leverages MongoDB for data storage and utilizes JWT for authentication.
 
+Additionally, the project includes a minimal cache-first service worker in `public/sw.js` to improve performance by caching static assets and serving them from the cache when available.
+
 ## Tech Stack
 
 - **Language**: TypeScript
@@ -39,6 +41,46 @@ docker-compose up -d
 ```
 
 This command will start all required services. Ensure that a local Ollama instance is running on `http://localhost:11434` for AI features.
+
+## Service Worker Implementation
+
+The service worker is implemented in `public/sw.js`. It uses the Cache Storage API to cache static assets and implements a cache-first strategy for serving these assets.
+
+### Key Features of the Service Worker
+
+- **Cache Initialization**: The service worker initializes by opening a cache named 'task-cache'.
+- **Install Event**: On installation, it caches all static assets listed in the `staticAssets` array.
+- **Fetch Event**: During the fetch event, it checks if the requested resource is available in the cache. If not, it falls back to fetching from the network.
+
+### Code Snippet
+
+```javascript
+// public/sw.js
+
+const CACHE_NAME = 'task-cache';
+const staticAssets = [
+  '/',
+  '/index.html',
+  '/styles.css',
+  '/app.js'
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(staticAssets);
+    })
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
+  );
+});
+```
 
 ## API Route List
 
@@ -98,42 +140,4 @@ This command will start all required services. Ensure that a local Ollama instan
   **Path**: `/api/billing/portal`  
   **Description**: Redirects authenticated users to their Stripe billing portal 
 
-## Configuration and Usage of manifest.json
-
-To configure your application with a custom `manifest.json` file, follow these steps:
-
-1. Create or update the `public/manifest.json` file in your project.
-2. Add the following JSON content to the `manifest.json` file:
-
-```json
-{
-  "name": "YourAppName",
-  "short_name": "App",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#007bff",
-  "icons": [
-    {
-      "src": "/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ],
-  "apple_web_app": {
-    "capable": true,
-    "status_bar_style": "black",
-    "title": "YourAppName"
-  }
-}
-```
-
-3. Replace the values with your application's details.
-4. Ensure that the `icons` section includes paths to your app's icons in different sizes.
-
-By following these steps, you can configure your Next.js application to have a custom manifest file that enhances the user experience and improves PWA (Progressive Web App) functionality.
+## Configuration
