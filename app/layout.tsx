@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Metadata } from 'next';
+import ServiceWorkerRegister from './ServiceWorkerRegister';
 
 export const metadata: Metadata = {
   title: 'My App',
@@ -24,7 +25,10 @@ export default function RootLayout({
       <head>
         {/* Additional head content can be added here */}
       </head>
-      <body>{children}</body>
+      <body>
+        <ServiceWorkerRegister />
+        {children}
+      </body>
     </html>
   );
 }
