@@ -31,7 +31,7 @@ const MobileNav: React.FC = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg hidden md:flex">
       <div className="flex justify-between px-4 py-2">
         {tabItems.map((item, index) => (
           <Link key={index} href={item.href} passHref>
