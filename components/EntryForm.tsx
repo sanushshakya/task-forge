@@ -49,7 +49,13 @@ const EntryForm: React.FC = () => {
   return (
     <div>
       <h1>Entry Form</h1>
-      <textarea value={entry.content} onChange={handleEntryChange} placeholder="Write your entry here..." />
+      <textarea
+        value={entry.content}
+        onChange={handleEntryChange}
+        placeholder="Write your entry here..."
+        rows={4}
+        className="resize-y w-full px-4 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+      />
       {isLoading && <p>Loading...</p>}
       {error && <p>Error: {error}</p>}
       {summary && <div>{summary.summary}</div>}
