@@ -55,6 +55,7 @@ const EntryForm: React.FC = () => {
         placeholder="Write your entry here..."
         rows={4}
         className="resize-y w-full px-4 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+        onInput={(e) => (e.target as HTMLTextAreaElement).rows = Math.min(10, Math.floor((e.target as HTMLTextAreaElement).scrollHeight / 20))}
       />
       {isLoading && <p>Loading...</p>}
       {error && <p>Error: {error}</p>}
