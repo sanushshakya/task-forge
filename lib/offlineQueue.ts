@@ -83,3 +83,10 @@ async function sendRequest(url: string, method: string, body: any): Promise<void
 export function getQueuedEntries(): { url: string; method: string; body: any }[] {
   return getOfflineQueue();
 }
+
+/**
+ * Clears all queued entries from the offline queue.
+ */
+export function clearQueue(): void {
+  localStorage.removeItem(OFFLINE_QUEUE_KEY);
+}
