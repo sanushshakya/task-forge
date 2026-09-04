@@ -75,3 +75,11 @@ async function sendRequest(url: string, method: string, body: any): Promise<void
     throw new Error(`Failed to send request: ${response.statusText}`);
   }
 }
+
+/**
+ * Retrieves all queued entries from the offline queue.
+ * @returns An array of failed POST requests.
+ */
+export function getQueuedEntries(): { url: string; method: string; body: any }[] {
+  return getOfflineQueue();
+}
