@@ -27,11 +27,18 @@ const SyncOnReconnect: React.FC = () => {
         // Function to sync queued entries
         const syncEntries = async (userId: string): Promise<void> => {
           try {
-            await axios.post('/api/entries/sync', { userId }, {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            });
+            // Fetch the queued entries
+            const queuedEntries = await offlineQueue.getQueuedEntries();
+
+            // Post each entry to /api/entries
+            for (const entry of queuedEntries) {
+              await axios.post('/api/entries', entry, {
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              });
+            }
+
             console.log('Sync completed successfully.');
           } catch (error) {
             console.error('Error syncing entries:', error);
