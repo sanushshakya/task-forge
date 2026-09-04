@@ -40,6 +40,8 @@ const SyncOnReconnect: React.FC = () => {
             }
 
             console.log('Sync completed successfully.');
+            // Clear the queue on success
+            offlineQueue.clearQueue();
           } catch (error) {
             console.error('Error syncing entries:', error);
           }
