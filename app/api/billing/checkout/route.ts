@@ -21,10 +21,15 @@ export async function createCheckoutRoute(req: Request, res: Response) {
   }
 
   try {
-    const customer = await stripe.customers.create({
-      email: req.body.email,
-    });
+    // Retrieve subscription details from request body
+    const { planId } = req.body;
 
+    // Check if the user has a valid subscription plan
+    if (!planId) {
+      return res.status(400).json({ error: 'Plan ID is required' });
+    }
+
+    // Create a Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -32,9 +37,9 @@ export async function createCheckoutRoute(req: Request, res: Response) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: req.body.productName,
+              name: 'Pro Plan', // Assuming 'Pro Plan' is the name of the subscription plan
             },
-            unit_amount: req.body.amount * 100, // Convert to cents
+            unit_amount: 2000, // Assuming $20 per month for the Pro Plan
           },
           quantity: 1,
         },
@@ -42,7 +47,7 @@ export async function createCheckoutRoute(req: Request, res: Response) {
       mode: 'payment',
       success_url: `${req.headers.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.origin}/cancel`,
-      customer: customer.id,
+      customer_email: req.body.email, // Assuming email is provided in the request body
     });
 
     return res.status(200).json({ sessionId: session.id });
