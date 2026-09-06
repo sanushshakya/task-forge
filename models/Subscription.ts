@@ -1,7 +1,9 @@
 // models/Subscription.ts
 
+import mongoose from 'mongoose';
+
 /**
- * Represents a subscription associated with a team.
+ * Represents a subscription associated with a user.
  */
 export interface Subscription {
   /**
@@ -10,49 +12,35 @@ export interface Subscription {
   _id: string;
 
   /**
-   * Reference to the team associated with the subscription.
+   * Reference to the user associated with the subscription.
    */
-  teamId: string;
+  userId: mongoose.Types.ObjectId;
 
   /**
-   * Stripe customer ID associated with the subscription.
+   * Indicates whether the subscription is active.
    */
-  stripeCustomerId: string;
+  isActive: boolean;
 
   /**
-   * Stripe subscription ID associated with the subscription.
+   * Expiration date of the subscription.
    */
-  stripeSubscriptionId: string;
-
-  /**
-   * Status of the subscription (e.g., active, cancelled).
-   */
-  status: 'active' | 'cancelled';
-
-  /**
-   * Plan of the subscription (e.g., basic, premium).
-   */
-  plan: 'basic' | 'premium';
-
-  /**
-   * Date when the current billing period ends.
-   */
-  currentPeriodEnd: Date;
-
-  /**
-   * Indicates whether the subscription is in a trial period.
-   */
-  isTrialPeriod: boolean;
+  expirationDate: Date;
 }
 
-// models/index.ts
+const subscriptionSchema = new mongoose.Schema<Subscription>({
+  userId: {
+    type: mongoose.SchemaTypes.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+  expirationDate: {
+    type: Date,
+    required: true,
+  },
+});
 
-/**
- * This module exports all models used in the application.
- */
-
-import { Subscription } from './Subscription';
-
-export {
-  Subscription,
-};
+export const SubscriptionModel = mongoose.model<Subscription>('Subscription', subscriptionSchema);
