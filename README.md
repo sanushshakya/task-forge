@@ -94,6 +94,12 @@ self.addEventListener('fetch', (event) => {
   **Path**: `/api/auth/signup`  
   **Description**: Handles user signup requests.
 
+### Billing Endpoints
+
+- **Method**: GET  
+  **Path**: `/api/billing/status`  
+  **Description**: Retrieves the billing status for the authenticated user.
+
 ### Entry Endpoints
 
 - **Middleware**: Ensures requests are only processed for authenticated users.
@@ -101,43 +107,4 @@ self.addEventListener('fetch', (event) => {
 ### Health Check
 
 - **Method**: GET  
-  **Path**: `/api/health`  
-  **Description**: Pings the MongoDB connection to ensure it's healthy.
-
-### Insights Endpoints
-
-- **Method**: GET  
-  **Path**: `/api/insights/weekly`  
-  **Description**: Retrieves user insights based on the last 7 days. AI features require a local Ollama instance running `qwen2.5-coder:7b`.
-
-### Summary Endpoints
-
-- **Method**: POST  
-  **Path**: `/api/summary`  
-  **Description**: Generates entry summaries using the Ollama API. AI features require a local Ollama instance running `qwen2.5-coder:7b`.
-
-### Team Endpoints
-
-- **Method**: POST  
-  **Path**: `/api/teams/invite`  
-  **Description**: Invites a user by email to join the authenticated user's team as a member if the requester is the team owner.
-
-### Billing Status Endpoint
-
-- **Method**: GET  
-  **Path**: `/api/billing/status`  
-  **Description**: Retrieves the current plan and status of the authenticated user's subscription.
-
-### Billing Checkout Endpoint
-
-- **Method**: POST  
-  **Path**: `/api/billing/checkout`  
-  **Description**: Initiates a billing checkout for the authenticated user's subscription. Redirects to the Stripe payment page.
-
-### Billing Portal Route
-
-- **Method**: GET  
-  **Path**: `/api/billing/portal`  
-  **Description**: Redirects authenticated users to their Stripe billing portal 
-
-## Configuration
+  **Path**: `/a
