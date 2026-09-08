@@ -8,11 +8,11 @@ import { getUserFromRequest } from '@/auth/dependencies';
  * @param req - The request object containing the JWT token.
  * @returns The user ID if the user is an admin, null otherwise.
  */
-export function requireAdmin(req): string | null {
+export async function requireAdmin(req): Promise<string | null> {
   const userId = getUserFromRequest(req);
 
   if (userId) {
-    // TODO: Fetch the user document from the database
+    // Fetch the user document from the database
     const userDocument = await fetchUserById(userId);
 
     if (userDocument && userDocument.isAdmin) {
