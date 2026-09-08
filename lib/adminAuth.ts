@@ -1,6 +1,7 @@
 // lib/adminAuth.ts
 
 import { getUserFromRequest } from '@/auth/dependencies';
+import { User } from '@/models/User';
 
 /**
  * Middleware to ensure that only admin users can access certain routes.
