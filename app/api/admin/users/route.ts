@@ -3,7 +3,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
-import { User, Subscription } from '@/models/User';
+import { User } from '@/models/User';
 import { validateAdmin } from '@/api/middleware/auth';
 
 const PAGE_SIZE = 10;
