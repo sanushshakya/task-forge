@@ -1,49 +1,55 @@
 // app/admin/page.tsx
 
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-/**
- * AdminStats component fetches and displays admin statistics.
- */
-const AdminStats: React.FC = () => {
-  const [stats, setStats] = useState<{ totalUsers: number; activeSubscriptions: number } | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+interface AdminStatistics {
+  totalUsers: number;
+  activeUsers: number;
+  inactiveUsers: number;
+  subscriptionCount: number;
+}
 
-  useEffect(() => {
-    const fetchAdminStats = async () => {
-      try {
-        const response = await axios.get('/api/admin/stats');
-        setStats(response.data);
-      } catch (err) {
-        setError('Failed to fetch admin statistics.');
-      } finally {
-        setLoading(false);
-      }
-    };
+const fetchAdminStatistics = async () => {
+  const response = await fetch('/api/admin/stats');
+  if (!response.ok) {
+    throw new Error('Failed to fetch admin statistics');
+  }
+  return response.json() as AdminStatistics;
+};
 
-    fetchAdminStats();
-  }, []);
+const AdminPage: React.FC = () => {
+  const { data, isLoading, isError } = useQuery<AdminStatistics>(
+    'adminStats',
+    fetchAdminStatistics
+  );
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error fetching admin statistics</div>;
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-4">Admin Statistics</h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Admin Statistics</h1>
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gray-100 p-4 rounded-lg text-center">
-          <h3 className="font-semibold">Total Users</h3>
-          <p>{stats?.totalUsers}</p>
+        <div className="bg-white p-4 shadow rounded-lg">
+          <h2 className="text-xl font-semibold mb-2">Total Users</h2>
+          <p>{data.totalUsers}</p>
         </div>
-        <div className="bg-gray-100 p-4 rounded-lg text-center">
-          <h3 className="font-semibold">Active Subscriptions</h3>
-          <p>{stats?.activeSubscriptions}</p>
+        <div className="bg-white p-4 shadow rounded-lg">
+          <h2 className="text-xl font-semibold mb-2">Active Users</h2>
+          <p>{data.activeUsers}</p>
+        </div>
+        <div className="bg-white p-4 shadow rounded-lg">
+          <h2 className="text-xl font-semibold mb-2">Inactive Users</h2>
+          <p>{data.inactiveUsers}</p>
+        </div>
+        <div className="bg-white p-4 shadow rounded-lg">
+          <h2 className="text-xl font-semibold mb-2">Subscription Count</h2>
+          <p>{data.subscriptionCount}</p>
         </div>
       </div>
     </div>
   );
 };
 
-export default AdminStats;
+export default AdminPage;
