@@ -7,7 +7,6 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import jwt from 'jsonwebtoken';
-import { decodeToken } from '@/auth/dependencies.py';
 
 /**
  * Middleware to validate the JWT token in the Authorization header of incoming requests.
