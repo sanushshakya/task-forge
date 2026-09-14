@@ -8,6 +8,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import jwt from 'jsonwebtoken';
 
+interface DecodedToken {
+  userId: string;
+  role?: string;
+}
+
 /**
  * Middleware to validate the JWT token in the Authorization header of incoming requests.
  * @param req - The incoming HTTP request.
@@ -46,20 +51,7 @@ export async function userAuthMiddleware(
   res: NextApiResponse,
   next: () => Promise<void>
 ) {
-  const token = req.headers.authorization?.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ message: 'No token provided' });
-  }
-
-  try {
-    const decodedToken = await decodeToken(token);
-    req.userId = decodedToken.userId;
-  } catch (error) {
-    return res.status(403).json({ message: 'Failed to authenticate token' });
-  }
-
-  next();
+  return authMiddleware(req, res, next);
 }
 
 /**
@@ -92,4 +84,22 @@ export async function adminAuthMiddleware(
   }
 
   next();
+}
+
+/**
+ * Decodes a JWT token and returns the current user's ID along with team information.
+ * @param token - The JWT token to decode.
+ * @returns A promise that resolves to the decoded token or rejects with an error.
+ */
+async function decodeToken(token: string): Promise<DecodedToken> {
+  try {
+    const secretKey = process.env.JWT_SECRET_KEY;
+    if (!secretKey) {
+      throw new Error('JWT_SECRET_KEY environment variable is not set');
+    }
+
+    return jwt.verify(token, secretKey) as DecodedToken;
+  } catch (error) {
+    throw new Error('Failed to decode JWT token');
+  }
 }
