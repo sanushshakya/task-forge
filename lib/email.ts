@@ -41,7 +41,7 @@ export class EmailService {
       console.log('Email sent successfully');
     } catch (error) {
       console.error('Error sending email:', error);
-      throw error;
+      // Log the error without throwing it
     }
   }
 
