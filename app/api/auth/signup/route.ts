@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import User from '@/models/User';
+import sendEmail from "@/services/sendEmail";
 
 /**
  * Handles user signup requests.
@@ -28,6 +29,17 @@ export async function POST(request: NextRequest) {
       email,
       passwordHash: hashedPassword,
     });
+
+    // Send welcome email
+    try {
+      await sendEmail(email, "Welcome to DailyLog", `
+        <h1>Welcome to DailyLog</h1>
+        <p>Hi there! Thank you for signing up. We're excited to have you on board.</p>
+      `);
+    } catch (emailError) {
+      console.error("Failed to send email:", emailError);
+      // Optionally, log the error and continue with the response
+    }
 
     return new NextResponse('User created successfully', { status: 201 });
   } catch (error) {
