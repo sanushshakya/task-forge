@@ -19,14 +19,14 @@ const searchEntriesHandler = async (req: NextApiRequest, res: NextApiResponse) =
     }
 
     // Extract search query from request query parameters
-    const { query } = req.query;
-    if (!query) {
+    const { q } = req.query;
+    if (!q) {
       return res.status(400).json({ error: 'Missing search query' });
     }
 
     // Build search criteria based on the query
     const searchCriteria = {
-      notes: { $regex: query, $options: 'i' },
+      notes: { $regex: q, $options: 'i' },
       userId,
     };
 
