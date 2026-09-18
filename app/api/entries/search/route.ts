@@ -1,7 +1,7 @@
 // app/api/entries/search/route.ts
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import { authMiddleware } from '@/api/middleware/auth';
+import { authMiddleware, getUserFromRequest } from '@/api/middleware/auth';
 import { EntryModel } from '@/models/Entry';
 
 /**
@@ -13,7 +13,7 @@ import { EntryModel } from '@/models/Entry';
 const searchEntriesHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     // Ensure the request is authenticated
-    const userId = authMiddleware(req);
+    const userId = await getUserFromRequest(req);
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
