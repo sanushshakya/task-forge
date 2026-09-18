@@ -156,61 +156,51 @@ interface Settings extends Document {
 
 const Settings: Model<Settings> = mongoose.model<Settings>('Settings', settingsSchema);
 
-// Function to fetch users without today's entry and send reminders
-async function sendDailyReminders() {
-  try {
-    // Get today's date in UTC
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+// Function to find users without today's Entry
+async function findUsersWithoutEntry(): Promise<User[]> {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set time to midnight for comparison
 
-    // Find users who do not have an entry for today
-    const usersWithoutTodayEntry = await User.find({
-      _id: {
-        $not: {
-          $in: await Entry.distinct('userId', { date: { $gte: today } }),
+  return User.find({
+    _id: {
+      $in: await Settings.find({ enableDailyReminders: true }).populate('userId').then(settings => 
+        settings.map(setting => setting.userId)
+      ),
+    },
+    _id: {
+      $not: {
+        $exists: {
+          $elemMatch: {
+            userId: { $in: Entry.distinct('userId') },
+            date: {
+              $gte: today,
+              $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000),
+            },
+          },
         },
       },
-    });
+    },
+  });
+}
 
-    if (usersWithoutTodayEntry.length === 0) {
-      console.log('No users without today\'s entry to remind.');
-      return;
-    }
-
-    // Find users with enabled daily reminders
-    const userSettings = await Settings.find({
-      userId: { $in: usersWithoutTodayEntry.map(user => user._id) },
-      enableDailyReminders: true,
-    });
-
-    if (userSettings.length === 0) {
-      console.log('No users with daily reminders enabled.');
-      return;
-    }
-
-    // Send reminders to each user
-    for (const user of userSettings) {
-      try {
+// Function to send daily reminders
+async function sendDailyReminders() {
+  try {
+    const users = await findUsersWithoutEntry();
+    for (const user of users) {
+      if (user.email) {
         await resend.emails.send({
-          from: 'your-email@example.com',
-          to: user.userId.email,
-          subject: 'Reminder: Log Your Entry Today!',
-          text: `Hello ${user.userId.username},\n\nPlease remember to log your entry for today. Thank you!\n\nBest regards,\nThe Team`,
+          from: 'daily-reminder@example.com',
+          to: user.email,
+          subject: 'Don\'t forget your daily Entry!',
+          html: '<p>Hello,</p><p>Please make sure you create an Entry for today.</p>',
         });
-        console.log(`Reminder sent to ${user.userId.email}`);
-      } catch (error) {
-        console.error(`Failed to send reminder to ${user.userId.email}:`, error);
       }
     }
-
-    console.log('Reminders sent successfully.');
   } catch (error) {
-    console.error('Error fetching users without today\'s entry:', error);
-  } finally {
-    // Close the MongoDB connection
-    await mongoose.connection.close();
+    console.error('Error sending daily reminders:', error);
   }
 }
 
-// Run the reminder function
-sendDailyReminders().catch(console.error);
+// Run the function to send daily reminders
+sendDailyReminders();
