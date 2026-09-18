@@ -145,7 +145,7 @@ const User: Model<User> = mongoose.model<User>('User', userSchema);
 const settingsSchema = new Schema<Settings>({
   _id: { type: mongoose.Types.ObjectId, required: true },
   userId: { type: mongoose.Types.ObjectId, ref: 'User', required: true },
-  enableDailyReminders: { type: Boolean, default: false },
+  enableDailyReminders: { type: Boolean, default: true },
 });
 
 interface Settings extends Document {
@@ -156,51 +156,47 @@ interface Settings extends Document {
 
 const Settings: Model<Settings> = mongoose.model<Settings>('Settings', settingsSchema);
 
-// Function to find users without today's Entry
-async function findUsersWithoutEntry(): Promise<User[]> {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Set time to midnight for comparison
-
-  return User.find({
-    _id: {
-      $in: await Settings.find({ enableDailyReminders: true }).populate('userId').then(settings => 
-        settings.map(setting => setting.userId)
-      ),
-    },
-    _id: {
-      $not: {
-        $exists: {
-          $elemMatch: {
-            userId: { $in: Entry.distinct('userId') },
-            date: {
-              $gte: today,
-              $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000),
-            },
-          },
-        },
-      },
-    },
-  });
-}
-
-// Function to send daily reminders
+/**
+ * Sends daily reminders to users without entries for today.
+ */
 async function sendDailyReminders() {
   try {
-    const users = await findUsersWithoutEntry();
-    for (const user of users) {
-      if (user.email) {
-        await resend.emails.send({
-          from: 'daily-reminder@example.com',
-          to: user.email,
-          subject: 'Don\'t forget your daily Entry!',
-          html: '<p>Hello,</p><p>Please make sure you create an Entry for today.</p>',
-        });
-      }
+    // Get today's date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Find all active users who don't have an entry for today
+    const usersWithoutEntryForToday: User[] = await User.find({
+      isActive: true,
+      _id: {
+        $nin: await Entry.distinct('userId', {
+          date: { $gte: today, $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) },
+        }),
+      },
+    });
+
+    // Find users with enabled daily reminders
+    const usersWithEnabledReminders = await Settings.find({
+      userId: { $in: usersWithoutEntryForToday.map(user => user._id) },
+      enableDailyReminders: true,
+    }).populate('userId');
+
+    // Send email reminders to each user with enabled reminders
+    for (const user of usersWithEnabledReminders) {
+      const { username, email } = user.userId as User;
+      await resend.emails.send({
+        from: 'daily-reminder@yourdomain.com',
+        to: email,
+        subject: 'Daily Reminder',
+        text: `Hello ${username}, it's time to make your daily entry!`,
+      });
     }
+
+    console.log('Daily reminders sent successfully.');
   } catch (error) {
-    console.error('Error sending daily reminders:', error);
+    console.error('Failed to send daily reminders:', error);
   }
 }
 
-// Run the function to send daily reminders
+// Run the function
 sendDailyReminders();
