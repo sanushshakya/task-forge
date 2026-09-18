@@ -30,8 +30,10 @@ const searchEntriesHandler = async (req: NextApiRequest, res: NextApiResponse) =
       userId,
     };
 
-    // Perform the search in the database
-    const entries = await EntryModel.find(searchCriteria);
+    // Perform the search in the database and limit/sort results
+    const entries = await EntryModel.find(searchCriteria)
+      .sort({ date: -1 }) // Sort by date descending
+      .limit(20); // Limit to 20 entries
 
     // Return the search results
     res.status(200).json(entries);
