@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
  * @property tasks - An array of strings representing tasks completed, optional.
  * @property mood - A string representing the user's mood on that day, optional.
  * @property notes - Additional notes or comments about the day, optional.
+ * @property tags - An array of strings representing tags associated with the entry, defaulting to an empty array.
  */
 const entrySchema = new mongoose.Schema({
   userId: {
@@ -29,6 +30,10 @@ const entrySchema = new mongoose.Schema({
   notes: {
     type: String,
     required: false,
+  },
+  tags: {
+    type: [String],
+    default: [],
   },
 });
 
