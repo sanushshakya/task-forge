@@ -22,16 +22,17 @@ import { getAuthUser } from '@/auth/dependencies';
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 totalEntries:
- *                   type: integer
- *                 averageDuration:
- *                   type: number
- *                 mostFrequentTags:
- *                   type: array
- *                   items:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   date:
  *                     type: string
+ *                     format: date-time
+ *                   mood:
+ *                     type: string
+ *                   taskCompletionRate:
+ *                     type: number
  *       400:
  *         description: Invalid month format.
  *       401:
@@ -69,18 +70,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
  * Fetches monthly stats for a user and month.
  * @param userId - The ID of the user.
  * @param month - The month in YYYY-MM format.
- * @returns Monthly stats object.
+ * @returns Array of objects containing date, mood, and task completion rate.
  */
-async function fetchMonthlyStats(userId: string, month: string): Promise<{ totalEntries: number; averageDuration: number; mostFrequentTags: string[] }> {
+async function fetchMonthlyStats(userId: string, month: string): Promise<{ date: string; mood: string; taskCompletionRate: number }[]> {
   // Implement logic to fetch monthly stats from the database
   // Example:
-  // const stats = await db.collection('stats').findOne({ userId, month });
+  // const stats = await db.collection('stats').find({ userId, month }).toArray();
   // return stats;
   
   // Placeholder return value
-  return {
-    totalEntries: 100,
-    averageDuration: 3600,
-    mostFrequentTags: ['tag1', 'tag2'],
-  };
+  return [
+    { date: '2023-10-01T00:00:00Z', mood: 'good', taskCompletionRate: 85 },
+    { date: '2023-10-02T00:00:00Z', mood: 'bad', taskCompletionRate: 75 },
+    // Add more entries as needed
+  ];
 }
