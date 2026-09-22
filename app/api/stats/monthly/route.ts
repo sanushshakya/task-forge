@@ -2,6 +2,7 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getAuthUser } from '@/auth/dependencies';
+import { User, Subscription } from "@/models";
 
 /**
  * @swagger
@@ -73,15 +74,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
  * @returns Array of objects containing date, mood, and task completion rate.
  */
 async function fetchMonthlyStats(userId: string, month: string): Promise<{ date: string; mood: string; taskCompletionRate: number }[]> {
-  // Implement logic to fetch monthly stats from the database
-  // Example:
-  // const stats = await db.collection('stats').find({ userId, month }).toArray();
-  // return stats;
-  
-  // Placeholder return value
-  return [
-    { date: '2023-10-01T00:00:00Z', mood: 'good', taskCompletionRate: 85 },
-    { date: '2023-10-02T00:00:00Z', mood: 'bad', taskCompletionRate: 75 },
-    // Add more entries as needed
-  ];
+  // Implement logic to fetch monthly stats from the database using Mongoose aggregation
+  try {
+    const stats = await Subscription.aggregate([
+      {
+        $match: { userId }
+      },
+      {
+        $unwind: '$monthlyStats'
+      },
+      {
+        $match: { 
+          'monthlyStats.month': month, 
+          'monthlyStats.isActive': true 
+        }
+      },
+      {
+        $project: {
+          date: '$monthlyStats.date',
+          mood: '$monthlyStats.mood',
+          taskCompletionRate: '$monthlyStats.taskCompletionRate'
+        }
+      }
+    ]);
+
+    return stats;
+  } catch (error) {
+    console.error('Error fetching monthly stats:', error);
+    throw new Error('Failed to fetch monthly stats');
+  }
 }
