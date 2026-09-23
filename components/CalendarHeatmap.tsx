@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { scaleLinear } from '@visx/scale';
 import { Group } from '@visx/group';
-import { RectMark } from '@visx/shape';
+import { RectMark, LineMark } from '@visx/shape';
 
 /**
  * Component for rendering a calendar heatmap.
@@ -77,6 +77,27 @@ const CalendarHeatmap: React.FC<{ data: { date: string; value: number }[] }> = (
               height={(entry.value / (maxValue - minValue)) * 200}
               fill={colorScale(entry.value)}
             />
+          );
+        })}
+      </Group>
+      {/* Add day numbers in each cell */}
+      <Group top={20} left={20}>
+        {dates.map((dateStr, index) => {
+          const date = dayjs(dateStr);
+          const x = (index + 0.5) * 30;
+          const y = 400 - 10;
+
+          return (
+            <Text
+              key={index}
+              x={x}
+              y={y}
+              fontSize={12}
+              textAnchor="middle"
+              fill="#333"
+            >
+              {date.date()}
+            </Text>
           );
         })}
       </Group>
