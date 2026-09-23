@@ -29,7 +29,6 @@ router.get('/', authenticateToken, async (req, res) => {
     // Create a CSV writer instance
     const createCsvWriter = csvWriter.createObjectCsvWriter;
     const csvWriterInstance = createCsvWriter({
-      path: 'user_entries.csv',
       header: [
         { id: 'id', title: 'ID' },
         { id: 'createdAt', title: 'Created At' },
@@ -40,13 +39,19 @@ router.get('/', authenticateToken, async (req, res) => {
     });
 
     // Write the data to a CSV file and send it as a response
-    csvWriterInstance.writeRecords(entries)
-      .then(() => res.download('user_entries.csv', (err) => {
-        if (err) {
-          console.error('Error sending file:', err);
-          return res.status(500).send('Error downloading CSV.');
-        }
-      }))
+    const csvData = entries.map(entry => ({
+      id: entry._id,
+      createdAt: entry.createdAt.toISOString(),
+      updatedAt: entry.updatedAt.toISOString(),
+      notes: entry.notes,
+      // Map other fields as necessary
+    }));
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=user_entries.csv');
+
+    csvWriterInstance.writeRecords(csvData)
+      .then(() => res.status(200).send())
       .catch((error) => {
         console.error('Error writing CSV:', error);
         return res.status(500).send('Internal Server Error.');
