@@ -1,5 +1,5 @@
 /**
- * Handles exporting user entries as CSV.
+ * Handles exporting user entries as CSV with authentication middleware.
  */
 
 import express from 'express';
@@ -7,12 +7,15 @@ import { User } from '@/models/User';
 import { Entry } from '@/models/Entry'; // Assuming an Entry model exists
 import { csvWriter } from 'csv-writer';
 
+// Import the authentication middleware
+import { authenticateToken } from '@/api/middleware/auth';
+
 const router = express.Router();
 
 /**
  * GET /api/entries/export/csv - Export user entries as CSV.
  */
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   try {
     const userId = req.userId; // Assume auth middleware sets this
 
