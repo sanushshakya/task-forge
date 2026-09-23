@@ -5,7 +5,7 @@
 import express from 'express';
 import { User } from '@/models/User';
 import { Entry } from '@/models/Entry'; // Assuming an Entry model exists
-import { csvWriter } from 'csv-writer';
+import csvWriter from 'csv-writer';
 
 // Import the authentication middleware
 import { authenticateToken } from '@/api/middleware/auth';
@@ -38,9 +38,9 @@ router.get('/', authenticateToken, async (req, res) => {
       ],
     });
 
-    // Write the data to a CSV file and send it as a response
+    // Convert entries to CSV format manually
     const csvData = entries.map(entry => ({
-      id: entry._id,
+      id: entry._id.toString(),
       createdAt: entry.createdAt.toISOString(),
       updatedAt: entry.updatedAt.toISOString(),
       notes: entry.notes,
@@ -50,12 +50,9 @@ router.get('/', authenticateToken, async (req, res) => {
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename=user_entries.csv');
 
-    csvWriterInstance.writeRecords(csvData)
-      .then(() => res.status(200).send())
-      .catch((error) => {
-        console.error('Error writing CSV:', error);
-        return res.status(500).send('Internal Server Error.');
-      });
+    const csvString = csvWriterInstance.toString(csvData);
+    res.send(csvString);
+
   } catch (error) {
     console.error('Error exporting entries as CSV:', error);
     return res.status(500).send('Internal Server Error.');
