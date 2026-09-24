@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
 import { User } from '@/models/User';
+import { sendEmail } from '@/lib/email';
 
 /**
  * Route handler for initiating a password reset request.
@@ -39,9 +40,15 @@ export async function initiateResetPasswordRequest(req: Request, res: Response):
       }
     );
 
-    // Send the reset token to the user's email (this step would typically involve an email service)
-    // For demonstration purposes, we'll just log it here
-    console.log(`Reset Token for ${user.email}: ${resetToken}`);
+    // Construct the reset URL
+    const resetUrl = `https://example.com/reset-password?token=${resetToken}`;
+
+    // Send the reset email with the reset link
+    await sendEmail({
+      to: user.email,
+      subject: 'Password Reset Request',
+      text: `You are receiving this because you (or someone else) have requested a password reset for your account.\n\nPlease click on the following link, or paste it into your browser to complete the process:\n${resetUrl}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.`,
+    });
 
     return res.status(200).json({ message: 'Password reset request initiated' });
   } catch (error) {
