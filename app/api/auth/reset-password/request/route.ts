@@ -24,6 +24,21 @@ export async function initiateResetPasswordRequest(req: Request, res: Response):
     // Generate a reset token using crypto.randomBytes for added security
     const resetToken = crypto.randomBytes(32).toString('hex');
 
+    // Set the expiry time for the reset token (e.g., 1 hour from now)
+    const resetTokenExpiry = new Date();
+    resetTokenExpiry.setHours(resetTokenExpiry.getHours() + 1);
+
+    // Update the user's document with the reset token and its expiry
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          resetToken,
+          resetTokenExpiry,
+        },
+      }
+    );
+
     // Send the reset token to the user's email (this step would typically involve an email service)
     // For demonstration purposes, we'll just log it here
     console.log(`Reset Token for ${user.email}: ${resetToken}`);
