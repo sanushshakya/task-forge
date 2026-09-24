@@ -1,7 +1,7 @@
 // app/api/auth/reset-password/request/route.ts
 
 import { Request, Response } from 'express';
-import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
 import { User } from '@/models/User';
 
@@ -21,8 +21,8 @@ export async function initiateResetPasswordRequest(req: Request, res: Response):
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Generate a reset token
-    const resetToken = jwt.sign({ userId: user._id }, process.env.RESET_TOKEN_SECRET, { expiresIn: '1h' });
+    // Generate a reset token using crypto.randomBytes for added security
+    const resetToken = crypto.randomBytes(32).toString('hex');
 
     // Send the reset token to the user's email (this step would typically involve an email service)
     // For demonstration purposes, we'll just log it here
