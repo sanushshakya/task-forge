@@ -1,18 +1,22 @@
 // auth/dependencies.py
 
-import jwt from 'jsonwebtoken';
+import { decode } from 'jsonwebtoken';
 import { User } from '../models/User';
 
 /**
- * Decodes a JWT token and returns the current user's ID.
- * @param token - The JWT token to decode.
- * @returns The ID of the authenticated user or null if decoding fails.
+ * Decodes a JWT token and returns the current user's ID along with team information.
+ * @param {string} token - The JWT token to decode.
+ * @returns {Promise<{ userId: string; teamId?: string }>} A promise that resolves to an object containing the user's ID and optionally their team ID.
+ * @throws {Error} If the token is invalid or expired.
  */
-export async function get_current_user(token: string): Promise<string | null> {
+export const get_current_user = async (token: string): Promise<{ userId: string; teamId?: string }> => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-    return decoded.userId as string;
+    const decodedToken = decode(token, { complete: true });
+    if (!decodedToken || !decodedToken.payload || typeof decodedToken.payload.sub !== 'string') {
+      throw new Error('Invalid token');
+    }
+    return { userId: decodedToken.payload.sub };
   } catch (error) {
-    return null;
+    throw error;
   }
-}
+};
