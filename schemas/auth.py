@@ -1,40 +1,38 @@
-// app/api/auth/schemas.ts
+// schemas/auth.py
 
-import { BaseModel } from 'pydantic';
-import { EmailStr, validator } from 'pydantic';
+from pydantic import BaseModel, EmailStr, Field
 
-/**
- * Pydantic model for login request.
- */
-export class LoginRequest extends BaseModel {
-  @validator('email')
-  static validateEmail(v: string): EmailStr {
-    return EmailStr.validate(v);
-  }
+class LoginRequest(BaseModel):
+    """
+    Pydantic model for login request.
 
-  email: EmailStr;
-  password: string;
-}
+    Attributes:
+        email (EmailStr): The user's email address.
+        password (str): The user's password.
+    """
+    email: EmailStr
+    password: str = Field(..., min_length=8)
 
-/**
- * Pydantic model for register request.
- */
-export class RegisterRequest extends BaseModel {
-  username: string;
-  email: EmailStr;
+class RegisterRequest(BaseModel):
+    """
+    Pydantic model for registration request.
 
-  @validator('email')
-  static validateEmail(v: string): EmailStr {
-    return EmailStr.validate(v);
-  }
+    Attributes:
+        username (str): The user's username.
+        email (EmailStr): The user's email address.
+        password (str): The user's password.
+    """
+    username: str
+    email: EmailStr
+    password: str = Field(..., min_length=8)
 
-  password: string;
-}
+class TokenResponse(BaseModel):
+    """
+    Pydantic model for token response.
 
-/**
- * Pydantic model for token response.
- */
-export class TokenResponse extends BaseModel {
-  access_token: string;
-  token_type: string;
-}
+    Attributes:
+        access_token (str): The access token.
+        token_type (str): The type of the token.
+    """
+    access_token: str
+    token_type: str = "bearer"
