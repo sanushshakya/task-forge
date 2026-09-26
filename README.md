@@ -1,73 +1,36 @@
----
-# README.md
-
-## Features
-
-- **Email Welcome Message**: Upon successful user creation, an email with a subject "Welcome to DailyLog" and a simple HTML body greeting the user by email is sent.
----
-
-// models/User.ts
-
-/**
- * Represents a user in the application with an optional team association and admin status.
- */
-export interface User {
-  /**
-   * The unique identifier for the user.
-   */
-  _id: string;
-
-  /**
-   * The username of the user.
-   */
-  username: string;
-
-  /**
-   * The email address of the user.
-   */
-  email: string;
-
-  /**
-   * Indicates whether the user's account is active.
-   */
-  isActive: boolean;
-
-  /**
-   * Optional reference to a team associated with the user.
-   */
-  teamId?: string;
-
-  /**
-   * Indicates whether the user has admin privileges.
-   */
-  isAdmin: boolean;
-}
-
-// app/api/auth/signup/route.ts
+// app/api/auth/reset-password/confirm/route.ts
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import { sendEmail } from '@/utils/sendEmail'; // Assuming this utility function exists to handle email sending
+import bcrypt from 'bcrypt';
 import User from '@/models/User';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
     try {
-      const { username, email } = req.body;
+      const { token, newPassword } = req.body;
 
-      // Create user in the database
-      const newUser = new User({ username, email });
-      await newUser.save();
+      // Find user with matching resetToken that hasn't expired
+      const user = await User.findOne({
+        resetToken: token,
+        resetTokenExpiry: { $gt: new Date() },
+      });
 
-      // Send welcome email to the new user
-      await sendEmail(email, 'Welcome to DailyLog', `
-        <h1>Welcome to DailyLog!</h1>
-        <p>Hi ${username}, thank you for joining DailyLog. We're excited to have you on board.</p>
-        <p>Get started today and keep track of your daily activities with ease.</p>
-      `);
+      if (!user) {
+        return res.status(400).json({ message: 'Invalid or expired token' });
+      }
 
-      res.status(201).json({ message: 'User created successfully', user: newUser });
+      // Hash the new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Save the new hashed password and clear resetToken and resetTokenExpiry
+      user.password = hashedPassword;
+      user.resetToken = null;
+      user.resetTokenExpiry = null;
+      await user.save();
+
+      res.status(200).json({ message: 'Password updated successfully' });
     } catch (error) {
-      console.error('Error creating user:', error);
+      console.error('Error confirming password reset:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
   } else {
@@ -77,3 +40,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default handler;
+```
+
+// README.md
+
+## Features
+
+- **Email Welcome Message**: Upon successful user creation, an email with a subject "Welcome to DailyLog" and a simple HTML body greeting the user by email is sent.
+- **Password Reset Confirmation**: Allows users to confirm their new password using a reset token. The token must be valid and not expired. If successful, the user's password is updated and the token is cleared.
+
+---
