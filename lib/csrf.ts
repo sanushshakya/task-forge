@@ -16,6 +16,12 @@ import { Request, Response, NextFunction } from 'express';
 export function verifyOrigin(req: Request, res: Response, next: NextFunction): void {
   const allowedOrigins = process.env.ALLOWED_ORIGIN?.split(',') || [];
 
+  // Check if ALLOWED_ORIGIN is set
+  if (!allowedOrigins.length) {
+    console.error('ALLOWED_ORIGIN environment variable is not set. CORS protection disabled.');
+    return next(); // Proceed without CORS check if no allowed origins are specified
+  }
+
   // Get the Origin header from the request
   const origin = req.headers.origin;
 
