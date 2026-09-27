@@ -13,7 +13,7 @@ import { Request, Response, NextFunction } from 'express';
  * @param res - The outgoing response object.
  * @param next - The next middleware function in the stack.
  */
-export function csrfMiddleware(req: Request, res: Response, next: NextFunction): void {
+export function verifyOrigin(req: Request, res: Response, next: NextFunction): void {
   const allowedOrigins = process.env.ALLOWED_ORIGIN?.split(',') || [];
 
   // Get the Origin header from the request
