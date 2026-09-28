@@ -11,12 +11,17 @@ async function handleFeature(req: Request, res: Response) {
     return res.status(403).json({ message: 'Forbidden' });
   }
 
-  // Existing code for handling the POST request
   try {
+    // Validate request data
+    const requestData = await validateRequestData(req);
+    
     // Process the request
-    const data = await processRequestData(req);
+    const data = await processRequestData(requestData);
     return res.status(200).json(data);
   } catch (error) {
+    if (error instanceof ValidationError) {
+      return res.status(400).json({ error: 'Bad Request', details: error.details });
+    }
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
@@ -38,16 +43,42 @@ function verifyOrigin(req: Request): boolean {
 }
 
 /**
- * Processes the data received in the POST request.
+ * Validates the data received in the POST request.
  * @param req - The HTTP request object.
- * @returns A Promise that resolves with the processed data.
+ * @returns A Promise that resolves with the validated data.
  */
-async function processRequestData(req: Request): Promise<any> {
-  // Extract data from the request body
+async function validateRequestData(req: Request): Promise<any> {
   const { data } = await req.json();
 
+  if (!data) {
+    throw new ValidationError('Missing request data');
+  }
+
+  if (!Array.isArray(data)) {
+    throw new ValidationError('Invalid request data format');
+  }
+
+  return data;
+}
+
+/**
+ * Processes the data received in the POST request.
+ * @param data - The validated request data.
+ * @returns A Promise that resolves with the processed data.
+ */
+async function processRequestData(data: any[]): Promise<any> {
   // Process the data (example operation)
   const result = data.map(item => item.toUpperCase());
 
   return result;
+}
+
+// Custom error class for validation errors
+class ValidationError extends Error {
+  details: string;
+
+  constructor(message: string, details?: string) {
+    super(message);
+    this.details = details || '';
+  }
 }
