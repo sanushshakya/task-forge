@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import User from '@/models/User';
 import sendEmail from "@/services/sendEmail";
+import * as zod from 'zod';
 
 /**
  * Handles user signup requests.
@@ -13,6 +14,16 @@ import sendEmail from "@/services/sendEmail";
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
+
+    // Validate the password using zod schema
+    const passwordSchema = z.string().min(8, "Password must be at least 8 characters long")
+      .regex(/(?=.*\d)/, "Password must contain at least one number")
+      .regex(/(?=.*[a-zA-Z])/, "Password must contain at least one letter");
+    try {
+      passwordSchema.parse(password);
+    } catch (error) {
+      return new NextResponse('Invalid password', { status: 400 });
+    }
 
     // Check if the user already exists
     const existingUser = await User.findOne({ email });
