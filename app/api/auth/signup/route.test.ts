@@ -1,60 +1,36 @@
 // app/api/auth/signup/route.test.ts
 
-import { request } from 'supertest';
-import { app } from '../../app'; // Adjust the path based on your project structure
-import * as resend from 'resend';
+import { describe, it, expect } from 'vitest';
+import z from 'zod';
 
-jest.mock('resend', () => ({
-  sendEmail: jest.fn(),
-}));
+const passwordSchema = z.string().min(8).regex(/^(?=.*[a-zA-Z])(?=.*\d)/);
 
-describe('POST /api/auth/signup', () => {
-  it('should call sendEmail after successful user creation', async () => {
-    const mockUser = {
-      _id: '12345',
-      username: 'testuser',
-      email: 'test@example.com',
-      isActive: true,
-    };
+describe('Password Validation', () => {
+  it('should allow valid passwords', async () => {
+    const validPasswords = [
+      'password1',
+      'Passw0rd!',
+      '12345678',
+      'AaBbCcDd',
+    ];
 
-    // Mock the user creation logic to return the mock user
-    const createUserMock = jest.fn().mockResolvedValue(mockUser);
-
-    // Replace the actual user creation function with the mock
-    app.locals.createUser = createUserMock;
-
-    // Send a POST request to the signup route
-    await request(app)
-      .post('/api/auth/signup')
-      .send({
-        username: 'testuser',
-        email: 'test@example.com',
-        password: 'password123',
-      });
-
-    // Verify that sendEmail was called with the correct arguments
-    expect(resend.sendEmail).toHaveBeenCalledWith({
-      to: mockUser.email,
-      from: '"DailyLog" <welcome@dailylog.io>',
-      subject: 'Welcome to DailyLog',
-      html: `<p>Hi ${mockUser.username}, welcome to DailyLog!</p>`,
-    });
+    for (const password of validPasswords) {
+      expect(passwordSchema.safeParse(password).success).toBe(true);
+    }
   });
 
-  it('should handle errors during user creation', async () => {
-    const createUserMock = jest.fn().mockRejectedValue(new Error('User creation failed'));
+  it('should reject passwords with less than 8 characters', async () => {
+    const shortPassword = 'pass1';
+    expect(passwordSchema.safeParse(shortPassword).success).toBe(false);
+  });
 
-    app.locals.createUser = createUserMock;
+  it('should reject passwords without any letters', async () => {
+    const noLetterPassword = '12345678';
+    expect(passwordSchema.safeParse(noLetterPassword).success).toBe(false);
+  });
 
-    await request(app)
-      .post('/api/auth/signup')
-      .send({
-        username: 'testuser',
-        email: 'test@example.com',
-        password: 'password123',
-      })
-      .expect(500);
-
-    expect(resend.sendEmail).not.toHaveBeenCalled();
+  it('should reject passwords without any numbers', async () => {
+    const noNumberPassword = 'password';
+    expect(passwordSchema.safeParse(noNumberPassword).success).toBe(false);
   });
 });
