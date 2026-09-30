@@ -1,5 +1,7 @@
 // models/User.ts
 
+import mongoose from 'mongoose';
+
 /**
  * Represents a user in the application with an optional team association and admin status.
  */
@@ -7,7 +9,7 @@ export interface User {
   /**
    * The unique identifier for the user.
    */
-  _id: string;
+  _id: mongoose.Schema.Types.ObjectId;
 
   /**
    * The username of the user.
