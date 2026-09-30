@@ -1,6 +1,7 @@
 // models/AuditLog.ts
 
 import mongoose from 'mongoose';
+import { User } from './User'; // Import the User model from models/User.ts
 
 /**
  * Represents an audit log entry for tracking actions performed by users.
@@ -38,7 +39,7 @@ export interface AuditLog {
 const auditLogSchema = new mongoose.Schema<AuditLog>({
   userId: {
     type: mongoose.Types.ObjectId,
-    ref: 'User',
+    ref: 'User', // Reference to the User model
     required: true,
   },
   action: {
